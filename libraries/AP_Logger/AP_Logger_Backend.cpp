@@ -520,6 +520,31 @@ bool AP_Logger_Backend::Write_Rally()
 }
 #endif
 
+#if HAL_ROBOTARMWP_ENABLED
+//Write robot arm waypoint
+bool AP_Logger_Backend::Write_RobotArmWayPoint(uint8_t total,
+                    uint8_t sequence,
+                    const RobotArmLocation &rbt_arm_waypoint)
+{
+    const struct log_Robot_Arm_WP pkt_robot_arm_wp{
+        LOG_PACKET_HEADER_INIT(LOG_RAWP_MSG),
+        time_us         : AP_HAL::micros64(),
+        total           : total,
+        sequence        : sequence,
+        x_horizontal    : rbt_arm_waypoint.xhorizontal,
+        y_vertical      : rbt_arm_waypoint.yvertical,
+        z_altitude      : rbt_arm_waypoint.zalt
+    };
+    return WriteBlock(&pkt_robot_arm_wp, sizeof(pkt_robot_arm_wp));
+}
+
+//Write all robot arm waypoints
+bool AP_Logger_Backend::Write_RobotArmWP()
+{
+    // kick off asynchronous write:
+    return _startup_messagewriter->writeallrobotarmwaypoints();
+}
+#endif
 
 bool AP_Logger_Backend::Write_VER()
 {

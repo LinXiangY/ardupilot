@@ -32,11 +32,13 @@ void GCS::get_sensor_status_flags(uint32_t &present,
 MissionItemProtocol_Waypoints *GCS::_missionitemprotocol_waypoints;
 MissionItemProtocol_Rally *GCS::_missionitemprotocol_rally;
 MissionItemProtocol_Fence *GCS::_missionitemprotocol_fence;
+MissionItemProtocol_RobotArmWP *GCS::_missionitemprotocol_robotarmwp;
 
 const MAV_MISSION_TYPE GCS_MAVLINK::supported_mission_types[] = {
     MAV_MISSION_TYPE_MISSION,
     MAV_MISSION_TYPE_RALLY,
     MAV_MISSION_TYPE_FENCE,
+    MAV_MISSION_TYPE_ROBOTARMWP,
 };
 
 void GCS::init()

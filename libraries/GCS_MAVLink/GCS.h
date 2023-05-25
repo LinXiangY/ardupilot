@@ -32,6 +32,7 @@
 #include "MissionItemProtocol_Waypoints.h"
 #include "MissionItemProtocol_Rally.h"
 #include "MissionItemProtocol_Fence.h"
+#include "MissionItemProtocol_RobotArmWP.h"
 #include "ap_message.h"
 
 #define GCS_DEBUG_SEND_MESSAGE_TIMINGS 0
@@ -181,7 +182,7 @@ public:
                                      mission_type);
     }
 
-    static const MAV_MISSION_TYPE supported_mission_types[3];
+    static const MAV_MISSION_TYPE supported_mission_types[4];
 
     // packetReceived is called on any successful decode of a mavlink message
     virtual void packetReceived(const mavlink_status_t &status,
@@ -1054,6 +1055,7 @@ public:
     static MissionItemProtocol_Waypoints *_missionitemprotocol_waypoints;
     static MissionItemProtocol_Rally *_missionitemprotocol_rally;
     static MissionItemProtocol_Fence *_missionitemprotocol_fence;
+    static MissionItemProtocol_RobotArmWP *_missionitemprotocol_robotarmwp;
     MissionItemProtocol *get_prot_for_mission_type(const MAV_MISSION_TYPE mission_type) const;
     void try_send_queued_message_for_type(MAV_MISSION_TYPE type) const;
 

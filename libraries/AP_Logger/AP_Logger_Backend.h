@@ -120,6 +120,10 @@ public:
                           uint8_t sequence,
                           const RallyLocation &rally_point);
     bool Write_Rally();
+    bool Write_RobotArmWayPoint(uint8_t total,
+                        uint8_t sequence,
+                        const RobotArmLocation &rbt_arm_waypoint);
+    bool Write_RobotArmWP();
     bool Write_Format(const struct LogStructure *structure);
     bool Write_Message(const char *message);
     bool Write_MessageF(const char *fmt, ...);

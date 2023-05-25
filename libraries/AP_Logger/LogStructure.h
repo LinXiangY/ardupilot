@@ -530,6 +530,16 @@ struct PACKED log_Rally {
     int16_t altitude;
 };
 
+struct PACKED log_Robot_Arm_WP {
+    LOG_PACKET_HEADER;
+    uint64_t time_us;
+    uint8_t total;
+    uint8_t sequence;
+    float x_horizontal;
+    float y_vertical;
+    float z_altitude;
+};
+
 struct PACKED log_Beacon {
     LOG_PACKET_HEADER;
     uint64_t time_us;
@@ -1418,7 +1428,10 @@ LOG_STRUCTURE_FROM_AIS, \
     { LOG_MOTBATT_MSG, sizeof(log_MotBatt), \
       "MOTB", "QffffB",  "TimeUS,LiftMax,BatVolt,ThLimit,ThrAvMx,FailFlags", "s-----", "F-----" , true }, \
     { LOG_ICLI_MSG, sizeof(log_ICLI_t), \
-      "ICLI", "QBffBB",  "TimeUS,Instance,Roll,Temp,State,Location", "s#----", "F-----" , true }
+      "ICLI", "QBffBB",  "TimeUS,Instance,Roll,Temp,State,Location", "s#----", "F-----" , true }, \
+    { LOG_RAWP_MSG, sizeof(log_Robot_Arm_WP), \
+      "RAWP", "QBBfff", "TimeUS,Tot,Seq,x,y,Alt", "s--mmm", "F-----" }
+
 
 
 // message types 0 to 63 reserved for vehicle specific use
@@ -1503,6 +1516,7 @@ enum LogMessages : uint8_t {
     LOG_MOTBATT_MSG,
     LOG_VER_MSG,
     LOG_ICLI_MSG,   //inclination sensors log
+    LOG_RAWP_MSG,   //Robot Arm Way Point log
 
     _LOG_LAST_MSG_
 };

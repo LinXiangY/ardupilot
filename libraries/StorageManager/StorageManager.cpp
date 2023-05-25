@@ -51,7 +51,7 @@ const StorageManager::StorageArea StorageManager::layout[STORAGE_NUM_AREAS] = {
 /*
   layout for copter.
   On PX4v1 this gives 303 waypoints, 26 rally points and 38 fence points
-  On Pixhawk this gives 718 waypoints, 46 rally points and 70 fence points
+  On Pixhawk this gives 718 waypoints, 46 rally points and 70 fence points, and 25 robot arm waypoints
  */
 const StorageManager::StorageArea StorageManager::layout[STORAGE_NUM_AREAS] = {
 #if !APM_BUILD_COPTER_OR_HELI
@@ -85,7 +85,8 @@ const StorageManager::StorageArea StorageManager::layout[STORAGE_NUM_AREAS] = {
     { StorageParam,    8192,  1280},
     { StorageRally,    9472,   300},
     { StorageFence,    9772,   256},
-    { StorageMission,  10028,  5204}, // leave 128 byte gap for expansion
+    // { StorageMission,  10028,  5204}, // leave 128 byte gap for expansion
+    { StorageRobotArmWP,  10028,  5204}, // 325 robot arm waypoints,16 byte per one robot arm waypoint
     { StorageCANDNA,   15232,  1024},
     // 128 byte gap at end of first 16k
 #endif

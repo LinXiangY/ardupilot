@@ -872,6 +872,20 @@ void AP_Logger::Write_Rally()
 }
 #endif
 
+#if HAL_ROBOTARMWP_ENABLED
+void AP_Logger::Write_RobotArmWayPoint(uint8_t total,
+                                 uint8_t sequence,
+                                 const RobotArmLocation &rbt_arm_waypoint)
+{
+    FOR_EACH_BACKEND(Write_RobotArmWayPoint(total, sequence, rbt_arm_waypoint));
+}
+
+void AP_Logger::Write_RobotArmWP()
+{
+    FOR_EACH_BACKEND(Write_RobotArmWP());
+}
+#endif
+
 // output a FMT message for each backend if not already done so
 void AP_Logger::Safe_Write_Emit_FMT(log_write_fmt *f)
 {

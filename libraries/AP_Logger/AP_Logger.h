@@ -58,6 +58,7 @@
 #include <AP_Logger/LogStructure.h>
 #include <AP_Motors/AP_Motors.h>
 #include <AP_Rally/AP_Rally.h>
+#include <AE_RobotArmWP/AE_RobotArmWP.h>
 #include <AP_Beacon/AP_Beacon.h>
 #include <AP_Proximity/AP_Proximity.h>
 #include <AP_Vehicle/ModeReason.h>
@@ -288,6 +289,7 @@ public:
     void Write_RCOUT(void);
     void Write_RSSI();
     void Write_Rally();
+    void Write_RobotArmWP();
     void Write_Power(void);
     void Write_Radio(const mavlink_radio_t &packet);
     void Write_Message(const char *message);
@@ -308,6 +310,9 @@ public:
     void Write_RallyPoint(uint8_t total,
                           uint8_t sequence,
                           const RallyLocation &rally_point);
+    void Write_RobotArmWayPoint(uint8_t total,
+                          uint8_t sequence,
+                          const RobotArmLocation &rbt_arm_waypoint);
     void Write_Beacon(AP_Beacon &beacon);
 #if HAL_PROXIMITY_ENABLED
     void Write_Proximity(AP_Proximity &proximity);

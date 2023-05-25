@@ -504,6 +504,8 @@ MissionItemProtocol *GCS::get_prot_for_mission_type(const MAV_MISSION_TYPE missi
         return _missionitemprotocol_rally;
     case MAV_MISSION_TYPE_FENCE:
         return _missionitemprotocol_fence;
+    case MAV_MISSION_TYPE_ROBOTARMWP:
+        return _missionitemprotocol_robotarmwp;
     default:
         return nullptr;
     }

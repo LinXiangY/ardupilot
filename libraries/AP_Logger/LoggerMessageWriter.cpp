@@ -199,6 +199,19 @@ bool LoggerMessageWriter_DFLogStart::writeallrallypoints()
 }
 #endif
 
+#if HAL_ROBOTARMWP_ENABLED
+bool LoggerMessageWriter_DFLogStart::writeallrobotarmwaypoints()
+{
+    if (stage != Stage::DONE) {
+        return false;
+    }
+    stage = Stage::RUNNING_SUBWRITERS;
+    _finished = false;
+    _writeallrobotarmwaypoints.reset();
+    return true;
+}
+#endif
+
 void LoggerMessageWriter_WriteSysInfo::reset()
 {
     LoggerMessageWriter::reset();
@@ -280,6 +293,56 @@ void LoggerMessageWriter_WriteSysInfo::process() {
     }
 
     _finished = true;  // all done!
+}
+
+void LoggerMessageWriter_WriteAllRobotArmWayPoints::process()
+{
+    const AE_RobotArmWP *_robotarmwp = AE::robotarmwp();
+    if (_robotarmwp == nullptr) {
+        _finished = true;
+        return;
+    }
+
+    switch(stage) {
+
+    case Stage::WRITE_NEW_ROBOTARMWP_MESSAGE:
+        if (! _logger_backend->Write_Message("New robot arm waypoint")) {
+            return; // call me again
+        }
+        stage = Stage::WRITE_ALL_ROBOTARMWP_POINTS;
+        FALLTHROUGH;
+
+    case Stage::WRITE_ALL_ROBOTARMWP_POINTS:
+        while (_rbt_arm_wp_number_to_send < _robotarmwp->get_rbtarm_waypoint_total()) {
+            if (out_of_time_for_writing_messages()) {
+                return;
+            }
+            RobotArmLocation robotarmloc;
+            if (_robotarmwp->get_rbtarm_waypoint_with_index(_rbt_arm_wp_number_to_send, robotarmloc)) {
+                if (!_logger_backend->Write_RobotArmWayPoint(
+                        _robotarmwp->get_rbtarm_waypoint_total(),
+                        _rbt_arm_wp_number_to_send,
+                        robotarmloc)) {
+                    return; // call me again
+                }
+            }
+            _rbt_arm_wp_number_to_send++;
+        }
+        stage = Stage::DONE;
+        FALLTHROUGH;
+
+    case Stage::DONE:
+        break;
+    }
+
+    _finished = true;
+}
+
+void LoggerMessageWriter_WriteAllRobotArmWayPoints::reset()
+{
+    LoggerMessageWriter::reset();
+    stage = Stage::WRITE_NEW_ROBOTARMWP_MESSAGE;
+    _rbt_arm_wp_number_to_send = 0;
 }
 
 void LoggerMessageWriter_WriteAllRallyPoints::process()

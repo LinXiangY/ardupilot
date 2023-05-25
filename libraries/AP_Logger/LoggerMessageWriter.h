@@ -73,6 +73,23 @@ private:
     Stage stage = Stage::WRITE_NEW_RALLY_MESSAGE;
 };
 
+class LoggerMessageWriter_WriteAllRobotArmWayPoints : public LoggerMessageWriter {
+public:
+
+    void reset() override;
+    void process() override;
+
+private:
+    enum Stage {
+        WRITE_NEW_ROBOTARMWP_MESSAGE = 0,
+        WRITE_ALL_ROBOTARMWP_POINTS,
+        DONE
+    };
+
+    uint16_t _rbt_arm_wp_number_to_send;
+    Stage stage = Stage::WRITE_NEW_ROBOTARMWP_MESSAGE;
+};
+
 class LoggerMessageWriter_DFLogStart : public LoggerMessageWriter {
 public:
     LoggerMessageWriter_DFLogStart() :
@@ -82,6 +99,9 @@ public:
 #endif
 #if HAL_RALLY_ENABLED
         , _writeallrallypoints()
+#endif
+#if HAL_ROBOTARMWP_ENABLED
+        , _writeallrobotarmwaypoints()
 #endif
         {
         }
@@ -94,6 +114,9 @@ public:
 #endif
 #if HAL_RALLY_ENABLED
         _writeallrallypoints.set_logger_backend(backend);
+#endif
+#if HAL_ROBOTARMWP_ENABLED
+        _writeallrobotarmwaypoints.set_logger_backend(backend);
 #endif
     }
 
@@ -111,6 +134,9 @@ public:
 #endif
 #if HAL_RALLY_ENABLED
     bool writeallrallypoints();
+#endif
+#if HAL_ROBOTARMWP_ENABLED
+    bool writeallrobotarmwaypoints();
 #endif
 
 private:
@@ -148,5 +174,8 @@ private:
 #endif
 #if HAL_RALLY_ENABLED
     LoggerMessageWriter_WriteAllRallyPoints _writeallrallypoints;
+#endif
+#if HAL_ROBOTARMWP_ENABLED
+    LoggerMessageWriter_WriteAllRallyPoints _writeallrobotarmwaypoints;
 #endif
 };
