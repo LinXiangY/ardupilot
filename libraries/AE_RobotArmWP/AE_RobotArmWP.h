@@ -70,6 +70,8 @@ public:
 private:
     static AE_RobotArmWP *_singleton;
 
+    virtual bool is_valid(const RobotArmLocation &robot_arm_waypoint) const { return true; }
+
     static StorageAccess _storage;
 
     // parameters

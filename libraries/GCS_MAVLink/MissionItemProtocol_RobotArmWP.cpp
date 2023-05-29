@@ -58,13 +58,13 @@ MAV_MISSION_RESULT MissionItemProtocol_RobotArmWP::convert_MISSION_ITEM_INT_to_R
         cmd.frame != MAV_FRAME_GLOBAL_RELATIVE_ALT) {
         return MAV_MISSION_UNSUPPORTED_FRAME;
     }
-    if (!abs((int8_t)cmd.param1)<1) {
+    if (!(abs((int8_t)cmd.param1)<1)) {
         return MAV_MISSION_INVALID_PARAM5_X;
     }
-    if (!abs((int8_t)cmd.param2)<1) {
+    if (!(abs((int8_t)cmd.param2)<1)) {
         return MAV_MISSION_INVALID_PARAM6_Y;
     }
-    if (!abs((int8_t)cmd.param3)<1) {
+    if (!(abs((int8_t)cmd.param3)<1)) {
         return MAV_MISSION_INVALID_PARAM7;
     }
     ret = {};

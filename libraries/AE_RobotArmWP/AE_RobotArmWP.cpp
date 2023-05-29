@@ -93,7 +93,7 @@ bool AE_RobotArmWP::set_rbtarm_waypoint_with_index(uint8_t i, const RobotArmLoca
 // singleton instance
 AE_RobotArmWP *AE_RobotArmWP::_singleton;
 
-namespace AP {
+namespace AE {
 
 AE_RobotArmWP *robotarmwp()
 {

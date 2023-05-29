@@ -736,6 +736,14 @@ bool AP_Arming::mission_checks(bool report)
             #endif // CONFIG_HAL_BOARD == HAL_BOARD_SITL
             return false;
         }
+        AE_RobotArmWP *robotarmwp = AE::robotarmwp();
+        if (robotarmwp == nullptr) {
+            check_failed(ARMING_CHECK_MISSION, report, "No robotarmwp library present");
+            #if CONFIG_HAL_BOARD == HAL_BOARD_SITL
+                AP_HAL::panic("Mission checks requested, but no robotarmwp was allocated");
+            #endif // CONFIG_HAL_BOARD == HAL_BOARD_SITL
+            return false;
+        }
 
         const struct MisItemTable {
           MIS_ITEM_CHECK check;

@@ -98,6 +98,7 @@ public:
     friend class Parameters;
     friend class ParametersG2;
     friend class AP_Rally_Rover;
+    friend class AP_RobotArmWP_Rover;
     friend class AP_Arming_Rover;
 #if ADVANCED_FAILSAFE == ENABLED
     friend class AP_AdvancedFailsafe_Rover;

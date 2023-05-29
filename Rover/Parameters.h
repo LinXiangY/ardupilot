@@ -6,6 +6,7 @@
 #include "AC_Sprayer/AC_Sprayer.h"
 #include "AP_Gripper/AP_Gripper.h"
 #include "AP_Rally.h"
+#include "AP_RobotArmWP.h"
 #include "AP_Torqeedo/AP_Torqeedo.h"
 
 // Global parameter class.
@@ -369,6 +370,9 @@ public:
 
     // Rally point library
     AP_Rally_Rover rally;
+
+    // Rally point library
+    AP_RobotArmWP_Rover rbtarmwp;
 
     // Simple mode types
     AP_Int8 simple_type;

@@ -20,6 +20,7 @@
 #include <AP_Mission/AP_Mission.h>
 #include <AC_Fence/AC_Fence.h>
 #include <AP_Rally/AP_Rally.h>
+#include <AE_RobotArmWP/AE_RobotArmWP.h>
 #include <GCS_MAVLink/MissionItemProtocol_Rally.h>
 #include <GCS_MAVLink/MissionItemProtocol_Fence.h>
 
@@ -274,6 +275,14 @@ uint32_t AP_Filesystem_Mission::get_num_items(enum MAV_MISSION_TYPE mtype) const
             return 0;
         }
         return rally->get_rally_total();
+    }
+
+    case MAV_MISSION_TYPE_ROBOTARMWP: {
+        auto *robotarmwp = AE::robotarmwp();
+        if (robotarmwp == nullptr) {
+            return 0;
+        }
+        return robotarmwp->get_rbtarm_waypoint_total();
     }
         
     default:
