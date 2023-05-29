@@ -19,6 +19,7 @@ void MissionItemProtocol::init_send_requests(GCS_MAVLINK &_link,
     link = &_link;
 
     timelast_request_ms = AP_HAL::millis();
+    gcs().send_text(MAV_SEVERITY_CRITICAL, "h  ------------&&&&&&&&&&-------- next_item_ap_message_id = %u", (u_int8_t)next_item_ap_message_id());
     link->send_message(next_item_ap_message_id());
 }
 
@@ -53,7 +54,8 @@ void MissionItemProtocol::handle_mission_count(
     if (!mavlink2_requirement_met(_link, msg)) {
         return;
     }
-
+// hal.console->printf("\r\n------MissionItemProtocol : MAV_MISSION_TYPE_ROBOTARMWP prot send --------...\r\n");
+// gcs().send_text(MAV_SEVERITY_CRITICAL, "mavlink2_requirement_met %5.3f", (double)3.142f);
     if (receiving) {
         // someone is already uploading a mission.  If we are
         // receiving from someone then we will allow them to restart -
@@ -76,7 +78,9 @@ void MissionItemProtocol::handle_mission_count(
     }
 
     MAV_MISSION_RESULT ret_alloc = allocate_receive_resources(packet.count);
+gcs().send_text(MAV_SEVERITY_CRITICAL, "\r\n------------allocate_receive_resources %u---------\r\n", packet.count);
     if (ret_alloc != MAV_MISSION_ACCEPTED) {
+gcs().send_text(MAV_SEVERITY_CRITICAL, "\r\n-------------ret_alloc =  %u---------\r\n", ret_alloc);
         send_mission_ack(_link, msg, ret_alloc);
         return;
     }
@@ -88,7 +92,7 @@ void MissionItemProtocol::handle_mission_count(
         transfer_is_complete(_link, msg);
         return;
     }
-
+gcs().send_text(MAV_SEVERITY_CRITICAL, "\r\n------start waypoint receiving %5.3f---------\r\n", (double)3.333f);
     // start waypoint receiving
     init_send_requests(_link, msg, 0, packet.count-1);
 }
@@ -235,7 +239,7 @@ void MissionItemProtocol::handle_mission_item(const mavlink_message_t &msg, cons
     }
 
     const uint16_t _item_count = item_count();
-
+gcs().send_text(MAV_SEVERITY_CRITICAL, "\r\n----------_item_count =  %u\t  ,  cmd.seq = %u\t  -------\r\n", (uint16_t)_item_count, (uint16_t)cmd.seq);
     MAV_MISSION_RESULT result;
     if (cmd.seq < _item_count) {
         // command index is within the existing list, replace the command

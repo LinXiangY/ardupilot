@@ -498,7 +498,6 @@ void GCS_MAVLINK::send_ahrs2()
 MissionItemProtocol *GCS::get_prot_for_mission_type(const MAV_MISSION_TYPE mission_type) const
 {
     switch (mission_type) {
-    // hal.console->printf("\r\n------GCS::get_prot_for_mission_type : in function...\r\n");
     case MAV_MISSION_TYPE_MISSION:
         return _missionitemprotocol_waypoints;
     case MAV_MISSION_TYPE_RALLY:
@@ -506,7 +505,6 @@ MissionItemProtocol *GCS::get_prot_for_mission_type(const MAV_MISSION_TYPE missi
     case MAV_MISSION_TYPE_FENCE:
         return _missionitemprotocol_fence;
     case MAV_MISSION_TYPE_ROBOTARMWP:
-    //hal.console->printf("\r\n------GCS::get_prot_for_mission_type : erasing MAV_MISSION_TYPE_ROBOTARMWP...\r\n");
         return _missionitemprotocol_robotarmwp;
     default:
         return nullptr;
@@ -612,7 +610,6 @@ void GCS_MAVLINK::handle_mission_count(const mavlink_message_t &msg)
                                      msg.compid,
                                      MAV_MISSION_UNSUPPORTED,
                                      packet.mission_type);
-    hal.console->printf("\r\n------MissionItemProtocol : MAV_MISSION_TYPE_ROBOTARMWP prot == nullptr...\r\n");
         return;
     }
 hal.console->printf("\r\n------MissionItemProtocol : MAV_MISSION_TYPE_ROBOTARMWP prot send --------...\r\n");
@@ -781,6 +778,8 @@ void GCS_MAVLINK::handle_mission_item(const mavlink_message_t &msg)
     }
     const uint8_t current = packet.current;
     const MAV_MISSION_TYPE type = (MAV_MISSION_TYPE)packet.mission_type;
+
+hal.console->printf("\r\n----------handle_mission_item MAV_MISSION_TYPE type= %u -------- \r\n", packet.mission_type);
 
     if (type == MAV_MISSION_TYPE_MISSION && (current == 2 || current == 3)) {
         struct AP_Mission::Mission_Command cmd = {};
@@ -2126,26 +2125,20 @@ void GCS::update_send()
             _missionitemprotocol_fence = new MissionItemProtocol_Fence(*fence);
         }
         AE_RobotArmWP *robotarmwp = AE::robotarmwp();
-        hal.console->printf("\r\n------AE_RobotArmWP *robotarmwp = AE::robotarmwp()...\r\n");
         if (robotarmwp != nullptr) {
-            hal.console->printf("\r\n------AE_RobotArmWP *robotarmwp = AE::robotarmwp()..robotarmwp != nullptr.\r\n");
             _missionitemprotocol_robotarmwp = new MissionItemProtocol_RobotArmWP(*robotarmwp);
         }
     }
     if (_missionitemprotocol_waypoints != nullptr) {
-        hal.console->printf("\r\n------_missionitemprotocol_waypoints->update()-----------.\r\n");
         _missionitemprotocol_waypoints->update();
     }
     if (_missionitemprotocol_rally != nullptr) {
-        hal.console->printf("\r\n------_missionitemprotocol_rally->update()-----------.\r\n");
         _missionitemprotocol_rally->update();
     }
     if (_missionitemprotocol_fence != nullptr) {
-        hal.console->printf("\r\n------_missionitemprotocol_fence->update()-----------.\r\n");
         _missionitemprotocol_fence->update();
     }
     if (_missionitemprotocol_robotarmwp != nullptr) {
-        hal.console->printf("\r\n------_missionitemprotocol_robotarmwp->update()-----------.\r\n");
         _missionitemprotocol_robotarmwp->update();
     }
 #endif // HAL_BUILD_AP_PERIPH
@@ -4838,6 +4831,11 @@ bool GCS_MAVLINK::try_send_mission_message(const enum ap_message id)
         gcs().try_send_queued_message_for_type(MAV_MISSION_TYPE_FENCE);
         ret = true;
         break;
+    case MSG_NEXT_MISSION_REQUEST_ROBOTARMWP:
+        CHECK_PAYLOAD_SIZE(MISSION_REQUEST);
+        gcs().try_send_queued_message_for_type(MAV_MISSION_TYPE_ROBOTARMWP);
+        ret = true;
+        break;
     default:
         ret = true;
         break;
@@ -5206,6 +5204,7 @@ bool GCS_MAVLINK::try_send_message(const enum ap_message id)
     case MSG_NEXT_MISSION_REQUEST_WAYPOINTS:
     case MSG_NEXT_MISSION_REQUEST_RALLY:
     case MSG_NEXT_MISSION_REQUEST_FENCE:
+    case MSG_NEXT_MISSION_REQUEST_ROBOTARMWP:
         ret = try_send_mission_message(id);
         break;
 

@@ -27,10 +27,14 @@ MAV_MISSION_RESULT MissionItemProtocol_RobotArmWP::append_item(const mavlink_mis
 {
     RobotArmLocation rbtArmloc;
     const MAV_MISSION_RESULT ret = convert_MISSION_ITEM_INT_to_RobotArmLocation(cmd, rbtArmloc);
+    gcs().send_text(MAV_SEVERITY_CRITICAL, "\r\n----MissionItemProtocol_RobotArmWP--append_item----ret =  %u\t  ,  robotarmloc.x = %u\t ,  robotarmloc.y = %u\t -------\r\n", (uint16_t)ret, (uint16_t)rbtArmloc.xhorizontal, (uint16_t)rbtArmloc.yvertical);
+    gcs().send_text(MAV_SEVERITY_CRITICAL, "\r\n----MissionItemProtocol_RobotArmWP--append_item----ret =  %u\t  ,  cmd.param1 = %u\t ,  cmd.param2= %u\t ,  cmd.param3 = %u\t -------\r\n", (uint16_t)ret, (uint16_t)cmd.param1, (uint16_t)cmd.param2, (uint16_t)cmd.param3);
+    
     if (ret != MAV_MISSION_ACCEPTED) {
         return ret;
     }
     if (!robotarmwp.append(rbtArmloc)) {
+        gcs().send_text(MAV_SEVERITY_CRITICAL, "\r\n-----append-----robotarmwp.append(rbtArmloc) = fause ========== \r\n");
         return MAV_MISSION_ERROR;
     }
     return MAV_MISSION_ACCEPTED;
@@ -54,17 +58,16 @@ MAV_MISSION_RESULT MissionItemProtocol_RobotArmWP::convert_MISSION_ITEM_INT_to_R
     if (cmd.command != MAV_CMD_NAV_ROBOTARM_POINT) {
         return MAV_MISSION_UNSUPPORTED;
     }
-    if (cmd.frame != MAV_FRAME_GLOBAL_RELATIVE_ALT_INT &&
-        cmd.frame != MAV_FRAME_GLOBAL_RELATIVE_ALT) {
+    if (cmd.frame != MAV_FRAME_BODY_FRD) {
         return MAV_MISSION_UNSUPPORTED_FRAME;
     }
-    if (!(abs((int8_t)cmd.param1)<1)) {
+    if (!(abs(cmd.param1)<=1)) {
         return MAV_MISSION_INVALID_PARAM5_X;
     }
-    if (!(abs((int8_t)cmd.param2)<1)) {
+    if (!(abs(cmd.param2)<=1)) {
         return MAV_MISSION_INVALID_PARAM6_Y;
     }
-    if (!(abs((int8_t)cmd.param3)<1)) {
+    if (!(abs(cmd.param3)<=1)) {
         return MAV_MISSION_INVALID_PARAM7;
     }
     ret = {};
@@ -120,12 +123,15 @@ MAV_MISSION_RESULT MissionItemProtocol_RobotArmWP::replace_item(const mavlink_mi
 {
     RobotArmLocation robotarmloc;
     const MAV_MISSION_RESULT ret = convert_MISSION_ITEM_INT_to_RobotArmLocation(cmd, robotarmloc);
+    gcs().send_text(MAV_SEVERITY_CRITICAL, "\r\n----replace_item------ret =  %u\t  ,  robotarmloc.x = %u\t ,  robotarmloc.y = %u\t -------\r\n", (uint16_t)ret, (uint16_t)robotarmloc.xhorizontal, (uint16_t)robotarmloc.yvertical);
     if (ret != MAV_MISSION_ACCEPTED) {
         return ret;
     }
     if (!robotarmwp.set_rbtarm_waypoint_with_index(cmd.seq, robotarmloc)) {
+        gcs().send_text(MAV_SEVERITY_CRITICAL, "\r\n-----replace_item-----robotarmwp.set_rbtarm_waypoint_with_index = fause ========== \r\n");
         return MAV_MISSION_ERROR;
     }
+    
     return MAV_MISSION_ACCEPTED;
 }
 
