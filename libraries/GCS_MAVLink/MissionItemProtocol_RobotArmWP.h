@@ -2,12 +2,16 @@
 
 #include "MissionItemProtocol.h"
 
-class MissionItemProtocol_RobotArmWP : public MissionItemProtocol {
+class MissionItemProtocol_RobotArmWP : public MissionItemProtocol
+{
 public:
     MissionItemProtocol_RobotArmWP(class AE_RobotArmWP &_robotarmwp) :
         robotarmwp(_robotarmwp) {}
     void truncate(const mavlink_mission_count_t &packet) override;
-    MAV_MISSION_TYPE mission_type() const override { return MAV_MISSION_TYPE_ROBOTARMWP; }
+    MAV_MISSION_TYPE mission_type() const override
+    {
+        return MAV_MISSION_TYPE_ROBOTARMWP;
+    }
 
     MAV_MISSION_RESULT complete(const GCS_MAVLINK &_link) override;
     void timeout() override;
@@ -16,10 +20,11 @@ public:
       static function to get robot arm waypoint item as mavlink_mission_item_int_t
     */
     static bool get_item_as_mission_item(uint16_t seq, mavlink_mission_item_int_t &ret_packet);
-    
+
 protected:
 
-    ap_message next_item_ap_message_id() const override {
+    ap_message next_item_ap_message_id() const override
+    {
         return MSG_NEXT_MISSION_REQUEST_ROBOTARMWP;
     }
     bool clear_all_items() override WARN_IF_UNUSED;

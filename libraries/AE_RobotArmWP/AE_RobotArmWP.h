@@ -3,9 +3,9 @@
 
 /*
  * The AE_RobotArmWP library:
- * 
+ *
  * Initial implementation: andychen, May 2023
- *  
+ *
  * - responsible for managing a list of robotic arm way points
  * - reads and writes the robotic arm way points to storage
  * - provides access to the robotic arm way points
@@ -31,7 +31,8 @@ struct PACKED RobotArmLocation {
 
 /// @class    AE_RobotArmWP
 /// @brief    Object managing robotic arm way points
-class AE_RobotArmWP {
+class AE_RobotArmWP
+{
 public:
     AE_RobotArmWP();
 
@@ -42,10 +43,12 @@ public:
     // data handling
     bool get_rbtarm_waypoint_with_index(uint8_t i, RobotArmLocation &ret) const;
     bool set_rbtarm_waypoint_with_index(uint8_t i, const RobotArmLocation &rbtArmLoc);
-    uint8_t get_rbtarm_waypoint_total() const {
+    uint8_t get_rbtarm_waypoint_total() const
+    {
         return (uint8_t)_rbtarm_waypoint_total_count;
     }
-    uint8_t get_rbtarm_waypoint_max(void) const {
+    uint8_t get_rbtarm_waypoint_max(void) const
+    {
         const uint16_t ret = _storage.size() / uint16_t(sizeof(RobotArmLocation));
         if (ret > 255) {
             return 255;
@@ -58,19 +61,28 @@ public:
     bool append(const RobotArmLocation &loc) WARN_IF_UNUSED;
 
     // last time robotic arm way points changed
-    uint32_t last_change_time_ms(void) const { return _last_change_time_ms; }
+    uint32_t last_change_time_ms(void) const
+    {
+        return _last_change_time_ms;
+    }
 
     // parameter block
     static const struct AP_Param::GroupInfo var_info[];
 
     // get singleton instance
-    static AE_RobotArmWP *get_singleton() { return _singleton; }
+    static AE_RobotArmWP *get_singleton()
+    {
+        return _singleton;
+    }
 
 
 private:
     static AE_RobotArmWP *_singleton;
 
-    virtual bool is_valid(const RobotArmLocation &robot_arm_waypoint) const { return true; }
+    virtual bool is_valid(const RobotArmLocation &robot_arm_waypoint) const
+    {
+        return true;
+    }
 
     static StorageAccess _storage;
 
@@ -81,6 +93,7 @@ private:
     uint32_t _last_change_time_ms = 0xFFFFFFFF;
 };
 
-namespace AE {
-    AE_RobotArmWP *robotarmwp();
+namespace AE
+{
+AE_RobotArmWP *robotarmwp();
 };

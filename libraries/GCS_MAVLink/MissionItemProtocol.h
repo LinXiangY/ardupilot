@@ -55,7 +55,10 @@ public:
     void queued_request_send();
     void update();
 
-    bool active_link_is(const GCS_MAVLINK *_link) const { return _link == link; };
+    bool active_link_is(const GCS_MAVLINK *_link) const
+    {
+        return _link == link;
+    };
 
     virtual MAV_MISSION_TYPE mission_type() const = 0;
 
@@ -115,7 +118,8 @@ private:
 
     // complete - method called when transfer is complete - backends
     // are expected to override this method to do any required tidy up.
-    virtual MAV_MISSION_RESULT complete(const GCS_MAVLINK &_link) {
+    virtual MAV_MISSION_RESULT complete(const GCS_MAVLINK &_link)
+    {
         return MAV_MISSION_ACCEPTED;
     };
     // transfer_is_complete - tidy up after a transfer is complete;

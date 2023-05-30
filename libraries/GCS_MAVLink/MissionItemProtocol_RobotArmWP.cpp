@@ -27,14 +27,11 @@ MAV_MISSION_RESULT MissionItemProtocol_RobotArmWP::append_item(const mavlink_mis
 {
     RobotArmLocation rbtArmloc;
     const MAV_MISSION_RESULT ret = convert_MISSION_ITEM_INT_to_RobotArmLocation(cmd, rbtArmloc);
-    gcs().send_text(MAV_SEVERITY_CRITICAL, "\r\n----MissionItemProtocol_RobotArmWP--append_item----ret =  %u\t  ,  robotarmloc.x = %u\t ,  robotarmloc.y = %u\t -------\r\n", (uint16_t)ret, (uint16_t)rbtArmloc.xhorizontal, (uint16_t)rbtArmloc.yvertical);
-    gcs().send_text(MAV_SEVERITY_CRITICAL, "\r\n----MissionItemProtocol_RobotArmWP--append_item----ret =  %u\t  ,  cmd.param1 = %u\t ,  cmd.param2= %u\t ,  cmd.param3 = %u\t -------\r\n", (uint16_t)ret, (uint16_t)cmd.param1, (uint16_t)cmd.param2, (uint16_t)cmd.param3);
-    
+
     if (ret != MAV_MISSION_ACCEPTED) {
         return ret;
     }
     if (!robotarmwp.append(rbtArmloc)) {
-        gcs().send_text(MAV_SEVERITY_CRITICAL, "\r\n-----append-----robotarmwp.append(rbtArmloc) = fause ========== \r\n");
         return MAV_MISSION_ERROR;
     }
     return MAV_MISSION_ACCEPTED;
@@ -81,7 +78,7 @@ MAV_MISSION_RESULT MissionItemProtocol_RobotArmWP::convert_MISSION_ITEM_INT_to_R
   static function to get robot arm waypoint item as mavlink_mission_item_int_t
  */
 bool MissionItemProtocol_RobotArmWP::get_item_as_mission_item(uint16_t seq,
-                                                         mavlink_mission_item_int_t &ret_packet)
+        mavlink_mission_item_int_t &ret_packet)
 {
     auto *robotarmwpp = AE::robotarmwp();
 
@@ -101,9 +98,9 @@ bool MissionItemProtocol_RobotArmWP::get_item_as_mission_item(uint16_t seq,
 }
 
 MAV_MISSION_RESULT MissionItemProtocol_RobotArmWP::get_item(const GCS_MAVLINK &_link,
-                                                       const mavlink_message_t &msg,
-                                                       const mavlink_mission_request_int_t &packet,
-                                                       mavlink_mission_item_int_t &ret_packet)
+        const mavlink_message_t &msg,
+        const mavlink_mission_request_int_t &packet,
+        mavlink_mission_item_int_t &ret_packet)
 {
     if (!get_item_as_mission_item(packet.seq, ret_packet)) {
         return MAV_MISSION_INVALID_SEQUENCE;
@@ -111,11 +108,13 @@ MAV_MISSION_RESULT MissionItemProtocol_RobotArmWP::get_item(const GCS_MAVLINK &_
     return MAV_MISSION_ACCEPTED;
 }
 
-uint16_t MissionItemProtocol_RobotArmWP::item_count() const {
+uint16_t MissionItemProtocol_RobotArmWP::item_count() const
+{
     return robotarmwp.get_rbtarm_waypoint_total();
 }
 
-uint16_t MissionItemProtocol_RobotArmWP::max_items() const {
+uint16_t MissionItemProtocol_RobotArmWP::max_items() const
+{
     return robotarmwp.get_rbtarm_waypoint_max();
 }
 
@@ -123,15 +122,13 @@ MAV_MISSION_RESULT MissionItemProtocol_RobotArmWP::replace_item(const mavlink_mi
 {
     RobotArmLocation robotarmloc;
     const MAV_MISSION_RESULT ret = convert_MISSION_ITEM_INT_to_RobotArmLocation(cmd, robotarmloc);
-    gcs().send_text(MAV_SEVERITY_CRITICAL, "\r\n----replace_item------ret =  %u\t  ,  robotarmloc.x = %u\t ,  robotarmloc.y = %u\t -------\r\n", (uint16_t)ret, (uint16_t)robotarmloc.xhorizontal, (uint16_t)robotarmloc.yvertical);
     if (ret != MAV_MISSION_ACCEPTED) {
         return ret;
     }
     if (!robotarmwp.set_rbtarm_waypoint_with_index(cmd.seq, robotarmloc)) {
-        gcs().send_text(MAV_SEVERITY_CRITICAL, "\r\n-----replace_item-----robotarmwp.set_rbtarm_waypoint_with_index = fause ========== \r\n");
         return MAV_MISSION_ERROR;
     }
-    
+
     return MAV_MISSION_ACCEPTED;
 }
 
