@@ -1,6 +1,14 @@
 #include "mode.h"
 #include "Rover.h"
 
+// test: used to switch to modeTBM
+bool ModeHold::_enter()
+{
+    rover.set_mode(rover.mode_tbm, ModeReason::GCS_COMMAND);
+
+    return false;
+}
+
 void ModeHold::update()
 {
     float throttle = 0.0f;

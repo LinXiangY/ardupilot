@@ -6,6 +6,7 @@
 #include <AP_Math/AP_Math.h>
 #include <AP_Mission/AP_Mission.h>
 #include <AR_WPNav/AR_WPNav.h>
+#include <AE_Mission_Arm/AE_Mission_Arm.h>
 
 #include "defines.h"
 
@@ -30,7 +31,8 @@ public:
         RTL          = 11,
         SMART_RTL    = 12,
         GUIDED       = 15,
-        INITIALISING = 16
+        INITIALISING = 16,
+        TBM          = 17
     };
 
     // Constructor
@@ -239,6 +241,52 @@ public:
     void handle_tack_request() override;
 };
 
+class ModeDig : public Mode
+{
+public:
+    // attributes of the mode
+    bool is_autopilot_mode() const override { return true; }
+
+    // methods that affect movement of the vehicle in this mode
+    void update() override;
+
+    AE_Mission_Arm mission{
+        FUNCTOR_BIND_MEMBER(&ModeDig::_start_command, bool, const RobotArmLocation&),
+        FUNCTOR_BIND_MEMBER(&ModeDig::_verify_command_callback, bool, const RobotArmLocation&),
+        FUNCTOR_BIND_MEMBER(&ModeDig::_exit_mission, void)};
+
+    bool waiting_to_start;  // true if waiting for EKF origin before starting mission
+
+protected:
+    bool _enter() override;
+    void _exit() override;
+
+    virtual bool __enter() { return true; };
+    virtual void __exit() {};
+
+    bool _start_command(const RobotArmLocation& cmd);
+    void _exit_mission();
+    bool _verify_command_callback(const RobotArmLocation& cmd);
+
+    virtual bool start_command(const RobotArmLocation& cmd) = 0;
+    virtual void exit_mission() = 0;
+    virtual bool verify_command_callback(const RobotArmLocation& cmd) = 0;
+};
+
+class ModeTBM : public ModeDig
+{
+public:
+    uint32_t mode_number() const override { return TBM; }
+    const char *name4() const override { return "TBM"; }
+
+protected:
+    bool __enter() override;
+    void __exit() override;
+
+    bool start_command(const RobotArmLocation& cmd) override;
+    void exit_mission() override;
+    bool verify_command_callback(const RobotArmLocation& cmd) override;
+};
 
 class ModeAuto : public Mode
 {
@@ -491,6 +539,11 @@ public:
     // hold mode does not require position or velocity estimate
     bool requires_position() const override { return false; }
     bool requires_velocity() const override { return false; }
+
+private:
+
+    // test: used to switch to modeTBM
+    bool _enter() override;
 };
 
 class ModeLoiter : public Mode
