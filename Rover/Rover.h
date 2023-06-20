@@ -45,6 +45,7 @@
 #include <AP_Param/AP_Param.h>
 #include <AP_RangeFinder/AP_RangeFinder.h>          // Range finder library
 #include <AP_Inclination/AP_Inclination.h>          // inclination sensor library
+#include <AE_RobotArmInfo/AE_RobotArmInfo.h>          // robot arm info library
 #include <AP_RCMapper/AP_RCMapper.h>                // RC input mapping library
 #include <AP_Scheduler/AP_Scheduler.h>              // main loop scheduler
 #include <AP_Stats/AP_Stats.h>                      // statistics library
@@ -71,7 +72,7 @@
 #include <AR_Motors/AP_MotorsUGV.h>
 #include <AP_Torqeedo/AP_Torqeedo.h>
 #include <AP_AIS/AP_AIS.h>
-#include <AP_ArmPosition/AP_ArmPosition.h>
+
 
 #if AP_SCRIPTING_ENABLED
 #include <AP_Scripting/AP_Scripting.h>
@@ -156,7 +157,6 @@ private:
     // AP_RPM Module
     AP_RPM rpm_sensor;
 
-    AP_ArmLocation_Excavator excavator_arm;
 
     // Arming/Disarming management class
     AP_Arming_Rover arming;

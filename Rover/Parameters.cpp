@@ -670,6 +670,12 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     AP_SUBGROUPINFO(rbtarmwp, "RBTWP_", 51, ParametersG2, AP_RobotArmWP_Rover),
 #endif
 
+#if AE_RobotArmInfo_ENABLED == ENABLED
+    // @Group: ROBOTARMINFO_
+    // @Path: AE_RobotArmINFO.cpp,../libraries/AE_RobotArmINFO/AE_RobotArmINFO.cpp
+    AP_SUBGROUPINFO(rbt_arm_info, "RBTAM_", 52, ParametersG2, AE_RobotArmInfo),
+#endif
+
     AP_GROUPEND
 };
 

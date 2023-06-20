@@ -1,7 +1,6 @@
 #include "Rover.h"
 
 #include <AP_RangeFinder/AP_RangeFinder_Backend.h>
-#include <AP_ArmPosition/AP_ArmPosition.h>
 
 // check for new compass data - 10Hz
 void Rover::update_compass(void)
@@ -101,7 +100,4 @@ void Rover::read_inclinations(void)
     inclination.update();
 }
 
-void Rover::update_arm_position(void)
-{
-    excavator_arm.update_arm_position();
-}
+

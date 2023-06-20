@@ -134,7 +134,9 @@ const AP_Scheduler::Task Rover::scheduler_tasks[] = {
     SCHED_TASK_CLASS(AP_AIS, &rover.g2.ais, update, 5, 100, 135),
 #endif
     SCHED_TASK(read_inclinations,      50,    200,   138),
-    SCHED_TASK(update_arm_position,      50,    200,   139),
+#if AE_RobotArmInfo_ENABLED == ENABLED
+    SCHED_TASK_CLASS(AE_RobotArmInfo,   &rover.g2.rbt_arm_info,   update, 50,  200,  139),
+#endif
 };
 
 

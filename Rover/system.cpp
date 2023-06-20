@@ -78,6 +78,11 @@ void Rover::init_ardupilot()
     inclination.set_log_icli_bit(MASK_LOG_ICLI);
     inclination.init(LOCATION_NONE);
 
+#if AE_RobotArmInfo_ENABLED
+    // initialise robot arm info calculate library
+    g2.rbt_arm_info.init();
+#endif
+
 #if HAL_PROXIMITY_ENABLED
     // init proximity sensor
     g2.proximity.init();

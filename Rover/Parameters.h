@@ -1,6 +1,7 @@
 #pragma once
 
 #include <AP_Common/AP_Common.h>
+#include <AE_RobotArmInfo/AE_RobotArmInfo.h>
 
 #include "RC_Channel.h"
 #include "AC_Sprayer/AC_Sprayer.h"
@@ -224,6 +225,7 @@ public:
 
                 //excavator control
         k_param_inclination,    //inclination object
+        
         };
 
     AP_Int16    format_version;
@@ -371,8 +373,11 @@ public:
     // Rally point library
     AP_Rally_Rover rally;
 
-    // Rally point library
+    // Robot arm waypoint library
     AP_RobotArmWP_Rover rbtarmwp;
+
+    // Robot arm info library
+    AE_RobotArmInfo rbt_arm_info;
 
     // Simple mode types
     AP_Int8 simple_type;
