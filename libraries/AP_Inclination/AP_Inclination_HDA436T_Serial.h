@@ -22,7 +22,7 @@ private:
 
     // get a reading
     // bool get_reading(float &reading_roll_m, float &reading_yaw_m) override;
-    bool get_reading(Vector3f &reading_roll_deg, Vector3f &reading_yaw_deg, InstallLocation loc) override;
+    bool get_reading(Vector3f &reading_roll_deg, Vector3f &reading_pitch_deg, Vector3f &reading_yaw_deg, float &reading_slewing_deg, InstallLocation loc) override;
     // get temperature reading in C.  returns true on success and populates temp argument
     bool get_temp_C_from_loc(enum InstallLocation location, float &temp) const override;
 

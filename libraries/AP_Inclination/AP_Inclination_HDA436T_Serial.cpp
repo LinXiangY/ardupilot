@@ -56,7 +56,7 @@ extern const AP_HAL::HAL& hal;
 
 
 // read - return last value measured by sensor
-bool AP_Inclination_HDA436T_Serial::get_reading(Vector3f &reading_roll_deg, Vector3f &reading_yaw_deg, InstallLocation location)
+bool AP_Inclination_HDA436T_Serial::get_reading(Vector3f &reading_roll_deg, Vector3f &reading_pitch_deg, Vector3f &reading_yaw_deg, float &reading_slewing_deg, InstallLocation loc)
 {
     if (uart == nullptr) {
         return false;
@@ -128,7 +128,7 @@ bool AP_Inclination_HDA436T_Serial::get_reading(Vector3f &reading_roll_deg, Vect
 
     if (count > 0) {
         // return average distance of readings
-        switch (location) {
+        switch (loc) {
         case InstallLocation::Boom:     //reading_roll_deg.x denote boom angle
             reading_roll_deg.x = sum_roll_deg / count;
             reading_yaw_deg.x = sum_yaw_deg / count;
@@ -153,7 +153,7 @@ bool AP_Inclination_HDA436T_Serial::get_reading(Vector3f &reading_roll_deg, Vect
 
     if (count_out_of_positive_range > 0) {
         // if out of range readings return maximum range for the positive angle
-        switch (location) {
+        switch (loc) {
         case InstallLocation::Boom:     //reading_roll_deg.x denote boom angle
             reading_roll_deg.x = INCLINATION_ROLL_MAX_DEGREE;
             reading_yaw_deg.x = INCLINATION_YAW_MAX_DEGREE;
@@ -177,7 +177,7 @@ bool AP_Inclination_HDA436T_Serial::get_reading(Vector3f &reading_roll_deg, Vect
 
     if (count_out_of_negtive_range > 0) {
         // if out of range readings return maximum range for the negtive angle
-        switch (location) {
+        switch (loc) {
         case InstallLocation::Boom:     //reading_roll_deg.x denote boom angle
             reading_roll_deg.x = -INCLINATION_ROLL_MAX_DEGREE;
             reading_yaw_deg.x = -INCLINATION_YAW_MAX_DEGREE;

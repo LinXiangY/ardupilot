@@ -54,9 +54,9 @@ bool AE_RobotArmInfo_Excavator::check_if_info_valid(struct Excavator_Robot_Arm_S
     ex_state.cylinder_status[1].length_mm > ex_state.cylinder_status[1].length_max_mm ||
     ex_state.cylinder_status[2].length_mm > ex_state.cylinder_status[2].length_max_mm)
     {
-      return true;
-    }
       return false;
+    }
+      return true;
 }
 
 // return false if the excavator information has not been calculated exactly.

@@ -18,7 +18,11 @@ void AE_RobotArmInfo_TBM::init()
     
     _cutting_header_state.cutting_header_height = 0;
     _cutting_header_state.cutting_header_hor = 0;
-    _cutting_header_state.cutting_header_speed = 0;
+    _cutting_header_state.cutting_header_speed_height = 0;
+    _cutting_header_state.cutting_header_speed_hor = 0;
+    _last_t_us = AP_HAL::micros64();
+    _cutting_header_height_last = 0;
+    _cutting_header_hor_last = 0;
 
     for(uint8_t i=0;i<OIL_CYLINDER_NUM_MAX;i++)
     {
@@ -64,6 +68,12 @@ bool AE_RobotArmInfo_TBM::update_TBM_cutting_header_state(void)
         return false;
     }
     const AP_AHRS &ahrs = AP::ahrs();
+
+    //get this time and dt
+    uint64_t t_us = AP_HAL::micros64();
+    _dt = float((t_us - _last_t_us))/1000000;
+
+    //get transformation matrix for axis change
     Matrix3f transformation;
     Matrix3f boom_matrix;
     transformation.from_euler(ahrs.get_roll(),ahrs.get_pitch(),radians(inclination->yaw_deg_location(Boom)));
@@ -72,38 +82,60 @@ bool AE_RobotArmInfo_TBM::update_TBM_cutting_header_state(void)
         return false;
     }
     Vector3f _euler_boom_e2b_from_sensor = inclination->get_deg_location(Boom);
+
+    //Convert the sensor angle to the angle under the body coordinate system
     boom_matrix.from_euler(radians(_euler_boom_e2b_from_sensor.x),radians(_euler_boom_e2b_from_sensor.y),radians(_euler_boom_e2b_from_sensor.z));
     boom_matrix = transformation*boom_matrix;
     boom_matrix.to_euler(&_euler_boom_e2b_from_sensor.x,&_euler_boom_e2b_from_sensor.y,&_euler_boom_e2b_from_sensor.z);
+
+    //calculate cutting head infomation including height,hor,cyl length,height speed,hor speed 
+    //height and hor
     float boom_to_body = _euler_boom_e2b_from_sensor.y + get_ex_param()._deg_BFC;
     float slewing_to_body = radians(inclination->yaw_deg_location(Boom));
     _cutting_header_state.cutting_header_height =  get_ex_param()._mm_CF*sinf(boom_to_body) + get_ex_param()._mm_JL;
     _cutting_header_state.cutting_header_hor = sinf(slewing_to_body)*(get_ex_param()._mm_CF*cosf(boom_to_body) + get_ex_param()._mm_JC);
+
+    //cyl length
     float angle_ACB = get_ex_param()._deg_TCA + get_ex_param()._deg_BCF + boom_to_body;
-    _cutting_header_state.cylinder_status[0].length_mm = sqrt(get_ex_param()._mm_AC * get_ex_param()._mm_AC + get_ex_param()._mm_BC * get_ex_param()._mm_BC - 2*get_ex_param()._mm_AC*get_ex_param()._mm_BC*cos(angle_ACB));
+    _cutting_header_state.cylinder_status[0].length_mm = sqrt(get_ex_param()._mm_AC * get_ex_param()._mm_AC + 
+    get_ex_param()._mm_BC * get_ex_param()._mm_BC - 2*get_ex_param()._mm_AC*get_ex_param()._mm_BC*cos(angle_ACB));
+
+    //speed
+    _cutting_header_state.cutting_header_speed_height = (_cutting_header_state.cutting_header_height - _cutting_header_height_last)/_dt;
+    _cutting_header_state.cutting_header_speed_hor = (_cutting_header_state.cutting_header_hor - _cutting_header_hor_last)/_dt;
+
+    //save this infomation to last infomation for next calculate
+    _last_t_us = t_us;
+    _cutting_header_height_last = _cutting_header_state.cutting_header_height;
+    _cutting_header_hor_last = _cutting_header_state.cutting_header_hor;
+
     return true;
 }
 
+//check if cutting info out of range
 bool AE_RobotArmInfo_TBM::check_if_cutting_head_info_valid(struct TBM_Cutting_Header_State& cutting_header_state)
 {
     if(cutting_header_state.cylinder_status[0].length_mm > cutting_header_state.cylinder_status[0].length_max_mm)
     {
-        return true;
+        
+        return false;
     }
-    return false;
+    return true;
 }
 
 
 void AE_RobotArmInfo_TBM::Write_TBM_headInfo()
 {
-    AP::logger().Write("ARMP", "TimeUS,height,horizontal,boom_cyl",
+    AP::logger().Write("ARMP", "TimeUS,height,horizontal,boom_cyl,hei_v,hor_v",
                 "sm", // units: seconds, meters
                 "FB", // mult: 1e-6, 1e-2
-                "Qfff", // format: uint64_t, float, float, float
+                "Qfffff", // format: uint64_t, float, float, float
                 AP_HAL::micros64(),
                 (float)_cutting_header_state.cutting_header_height,
                 (float)_cutting_header_state.cutting_header_hor,
-                (float)_cutting_header_state.cylinder_status[0].length_mm);
+                (float)_cutting_header_state.cylinder_status[0].length_mm,
+                (float)_cutting_header_state.cutting_header_speed_height,
+                (float)_cutting_header_state.cutting_header_speed_hor);
 }
 
  

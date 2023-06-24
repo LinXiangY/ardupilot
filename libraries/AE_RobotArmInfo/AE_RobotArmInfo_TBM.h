@@ -32,7 +32,8 @@ public:
     struct TBM_Cutting_Header_State {
         float cutting_header_height;
         float cutting_header_hor;
-        float cutting_header_speed;
+        float cutting_header_speed_height;
+        float cutting_header_speed_hor;
         struct AE_RobotArmInfo::TBM_CH_Cylinder_State cylinder_status[TBM_OIL_CYLINDER_NUM_MAX];
     };
 
@@ -49,7 +50,9 @@ public:
 private:
 
     float _dt;
-    uint64_t _last_t;
+    uint64_t _last_t_us;
+    float _cutting_header_height_last;
+    float _cutting_header_hor_last;
     void Write_TBM_headInfo();
 
     bool calc_TBM_info(void);
