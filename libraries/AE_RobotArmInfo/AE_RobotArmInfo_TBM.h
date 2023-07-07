@@ -40,6 +40,9 @@ public:
     struct Back_Support_Leg_State {
         // float height;
         // float yaw;
+        float back_support_leg_height;
+        float back_support_leg_hor;
+        struct AE_RobotArmInfo::TBM_BSL_Cylinder_State cylinder_status[TBM_OIL_CYLINDER_NUM_MAX];
     };
 
     //get the cutting header state at base's body frame
@@ -57,8 +60,10 @@ private:
 
     bool calc_TBM_info(void);
     TBM_Cutting_Header_State _cutting_header_state;
+    Back_Support_Leg_State _back_leg_state;
 //update the cutting header state at base's body frame
     bool update_TBM_cutting_header_state(void); 
-    bool check_if_cutting_head_info_valid(struct TBM_Cutting_Header_State& cutting_header_state);
+    bool update_TBM_back_leg_state(void);
+    bool check_if_cutting_head_info_valid(struct TBM_Cutting_Header_State& cutting_header_state,struct Back_Support_Leg_State& back_leg_state);
 
 };

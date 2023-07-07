@@ -100,36 +100,45 @@ bool AE_RobotArmInfo_Excavator::calc_excavator_info()
     float boom_to_slewing = boom_to_body;
     float forearm_to_boom = forearm_to_body - boom_to_slewing;
     float bucket_to_forearm = bucket_to_body - forearm_to_boom - boom_to_slewing;
+    // AP::logger().Write("BP", "TimeUS,BR1,SR1,BUR1,BR2,SR2,BUR2,sw",
+    //             "sm", // units: seconds, meters
+    //             "FB", // mult: 1e-6, 1e-2
+    //             "Qfffffff", // format: uint64_t, float, float, float
+    //             AP_HAL::micros64(),
+    //             (float)_euler_boom_e2b_from_sensor.y,
+    //             (float)_euler_forearm_e2b_from_sensor.y,
+    //             (float)_euler_bucket_e2b_from_sensor.y,
+    //             (float)boom_to_body,
+    //             (float)forearm_to_body,
+    //             (float)bucket_to_body,
+    //             (float)slewing_to_body);
     //    
-    if(!calc_bucket_position(boom_to_body,forearm_to_body,bucket_to_body,slewing_to_body) && !calc_oil_cylinder_length(boom_to_slewing,forearm_to_boom,bucket_to_forearm))
-    {
-      return false;
-    }
+    calc_bucket_position(boom_to_body,forearm_to_body,bucket_to_body,slewing_to_body);
+    calc_oil_cylinder_length(boom_to_slewing,forearm_to_boom,bucket_to_forearm);
     return true;
 }
 
-bool AE_RobotArmInfo_Excavator::calc_oil_cylinder_length(float boom_to_slewing,float forearm_to_boom,float bucket_to_forearm)
+void AE_RobotArmInfo_Excavator::calc_oil_cylinder_length(float boom_to_slewing,float forearm_to_boom,float bucket_to_forearm)
 {
-  float angle_ACB = get_ex_param()._deg_TCA + get_ex_param()._deg_BCF + boom_to_slewing;
+  float angle_ACB = radians(get_ex_param()._deg_TCA) + radians(get_ex_param()._deg_BCF) + boom_to_slewing;
   ex_info.cylinder_status[0].length_mm = sqrt(get_ex_param()._mm_AC * get_ex_param()._mm_AC + get_ex_param()._mm_BC * get_ex_param()._mm_BC - 2*get_ex_param()._mm_AC*get_ex_param()._mm_BC*cos(angle_ACB));
-  float phi = (M_PI - get_ex_param()._deg_DFC -get_ex_param()._deg_QFG -get_ex_param()._deg_GFE - forearm_to_boom);
+  float phi = (M_PI - radians(get_ex_param()._deg_DFC) -radians(get_ex_param()._deg_QFG) -radians(get_ex_param()._deg_GFE) - forearm_to_boom);
   ex_info.cylinder_status[1].length_mm = sqrt(get_ex_param()._mm_DF * get_ex_param()._mm_DF + get_ex_param()._mm_EF*get_ex_param()._mm_EF -2*get_ex_param()._mm_EF*get_ex_param()._mm_DF*cos(phi));
-  float angle_KQN = M_PI - get_ex_param()._deg_NQF -bucket_to_forearm -get_ex_param()._deg_KQV;
+  float angle_KQN = M_PI - radians(get_ex_param()._deg_NQF) -bucket_to_forearm -radians(get_ex_param()._deg_KQV);
   float distance_NK = sqrt(get_ex_param()._mm_QN*get_ex_param()._mm_QN + get_ex_param()._mm_QK *get_ex_param()._mm_QK
   - 2*get_ex_param()._mm_QK*get_ex_param()._mm_QN*cos(angle_KQN));
   float angle_MNK = acos((get_ex_param()._mm_MN *get_ex_param()._mm_MN + distance_NK*distance_NK - 
   get_ex_param()._mm_MK *get_ex_param()._mm_MK)/(2*get_ex_param()._mm_MN*distance_NK));
   float angle_QNK = asin(get_ex_param()._mm_QK*sin(angle_KQN)/distance_NK);
-  float angle_GNM = M_2_PI - get_ex_param()._deg_GNF - get_ex_param()._deg_GNQ - angle_MNK - angle_QNK;
+  float angle_GNM = M_2_PI - radians(get_ex_param()._deg_GNF) - radians(get_ex_param()._deg_GNQ) - angle_MNK - angle_QNK;
   ex_info.cylinder_status[2].length_mm = sqrt(get_ex_param()._mm_GN *get_ex_param()._mm_GN + get_ex_param()._mm_MN*get_ex_param()._mm_MN 
   - 2*get_ex_param()._mm_MN*get_ex_param()._mm_GN*cos(angle_GNM));
   //
-  return true;
 }
 
  // return false if the position isn't calculated.
  // Calculate the three-dimensional coordinates of the tooth tip relative to the body
-bool AE_RobotArmInfo_Excavator::calc_bucket_position(float boom,float forearm,float bucket,float slewing)
+void AE_RobotArmInfo_Excavator::calc_bucket_position(float boom,float forearm,float bucket,float slewing)
 {
     //在这里写你的算法,想要获取什么值，跟下面的方法类似get_ex_param()._mm_QV
     ex_info.bucket_tip_pos_body.x = cosf(slewing)*(get_ex_param()._mm_QV*cosf(bucket) + get_ex_param()._mm_FQ*cosf(forearm)
@@ -138,7 +147,6 @@ bool AE_RobotArmInfo_Excavator::calc_bucket_position(float boom,float forearm,fl
     + get_ex_param()._mm_CF*cosf(boom) + get_ex_param()._mm_JC);
     ex_info.bucket_tip_pos_body.z = get_ex_param()._mm_QV*sinf(bucket) + get_ex_param()._mm_FQ*sinf(forearm)
     + get_ex_param()._mm_CF*sinf(boom) + get_ex_param()._mm_JL;
-    return true;
 }
 
 
@@ -146,10 +154,10 @@ bool AE_RobotArmInfo_Excavator::calc_bucket_position(float boom,float forearm,fl
 void AE_RobotArmInfo_Excavator::adjust_to_body_origin(float euler_boom, float euler_forearm, float euler_bucket, 
 float &boom_to_body,float &forearm_to_body,float &bucket_to_body)
 {
-    boom_to_body = euler_boom + get_ex_param()._deg_BFC;
+    boom_to_body = euler_boom + radians(get_ex_param()._deg_BFC);
     forearm_to_body = euler_forearm;
-    float angle_GNM = M_PI + forearm_to_body - get_ex_param()._deg_GNF - euler_bucket;
-    float angle_QNM = M_2PI - get_ex_param()._deg_FNQ - get_ex_param()._deg_GNF - angle_GNM;
+    float angle_GNM = M_PI + forearm_to_body - radians(get_ex_param()._deg_GNF) - euler_bucket;
+    float angle_QNM = M_2PI - radians(get_ex_param()._deg_FNQ) - radians(get_ex_param()._deg_GNF) - angle_GNM;
     float distance_QM = sqrt(get_ex_param()._mm_QN * get_ex_param()._mm_QN + get_ex_param()._mm_MN * get_ex_param()._mm_MN
         - 2 * get_ex_param()._mm_QN * get_ex_param()._mm_MN * cosf(angle_QNM));
     float angle_MQN = acosf((distance_QM * distance_QM
@@ -158,8 +166,8 @@ float &boom_to_body,float &forearm_to_body,float &bucket_to_body)
     float angle_MQK = acosf((get_ex_param()._mm_QK * get_ex_param()._mm_QK + distance_QM * distance_QM
         - get_ex_param()._mm_MK * get_ex_param()._mm_MK) /
         (2 * get_ex_param()._mm_QK * get_ex_param()._mm_MK));
-    float angle_DQV = M_2PI - get_ex_param()._deg_NQF - angle_MQN
-        - angle_MQK - get_ex_param()._deg_KQV;
+    float angle_DQV = M_2PI - radians(get_ex_param()._deg_NQF) - angle_MQN
+        - angle_MQK - radians(get_ex_param()._deg_KQV);
     bucket_to_body = forearm_to_body + angle_DQV - M_PI;
     if(bucket_to_body<(-2*M_PI)){
         bucket_to_body += 2*M_PI;

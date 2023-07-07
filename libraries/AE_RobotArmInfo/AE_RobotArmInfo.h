@@ -75,6 +75,13 @@ public:
         enum TBM_CH_OC_Name cylinder_name;
     };
 
+    struct TBM_BSL_Cylinder_State {
+        float length_mm;                        // mm
+        float velocity_mms;                     // mm/s
+        float length_max_mm;                    // mm        
+        enum TBM_BSL_OC_Name cylinder_name;
+    };
+
     struct AE_RobotArmInfo_Flags {
         uint8_t healthy : 1; // true if sensor is healthy
     } _flags;
@@ -161,6 +168,16 @@ private:
     // TBM param, refer to the website below to determine the specific meaning of the paramters
     // 
     struct TBM_PARAM{
+        // AP_Float _mm_AB;
+        // AP_Float _mm_OB;
+        // AP_Float _deg_OBA;
+        AP_Float _ch_cylinder_max[2];
+        AP_Float _bsl_cylinder_max[2];
+        AP_Float _mm_CD;
+        AP_Float _mm_DF;
+        AP_Float _mm_GI;
+        AP_Float _mm_CI;
+        AP_Float _deg_CDH;
         //TBM_PARAM
     } tbm_param;
 

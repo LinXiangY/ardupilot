@@ -61,7 +61,7 @@ bool AP_Inclination_Backend_Serial::detect(uint8_t serial_instance)
 */
 void AP_Inclination_Backend_Serial::update(enum InstallLocation loc)
 {
-    if (get_reading(state.roll_deg, state.pitch_deg,state.yaw_deg, state.encoder_deg, loc)) {
+    if (get_reading(state.roll_deg, state.pitch_deg,state.yaw_deg, loc)) {
         // update range_valid state based on distance measured
         state.last_reading_ms = AP_HAL::millis();
         update_status(loc);

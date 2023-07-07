@@ -37,7 +37,6 @@ public:
         return (InstallLocation)params.location.get();
     }
 
-    float get_slewing_deg() const { return state.encoder_deg; }
     float get_roll_deg_from_location(enum InstallLocation loc) const
     {
         switch (loc) {

@@ -58,7 +58,6 @@ public:
         Vector3f roll_deg;                 // roll_deg.x/.y/.z denote boom/forearm/bucket angle in degree
         Vector3f pitch_deg;                // pitch_deg.x/.y/.z denote boom/forearm/bucket angle in degree
         Vector3f yaw_deg;                  // yaw_deg.x/.y/.z denote boom/forearm/bucket angle in degree
-        float    encoder_deg;              // encoder_deg denote slewing angle in degree
         Vector3f temperature;              // temperature.x/.y/.z denote boom/forearm/bucket angle in degree
         enum Inclination::Status status; // sensor status
         uint8_t  range_valid_count;     // number of consecutive valid readings (maxes out at 3)

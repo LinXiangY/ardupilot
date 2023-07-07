@@ -56,7 +56,7 @@ extern const AP_HAL::HAL& hal;
 
 
 // read - return last value measured by sensor
-bool AP_Inclination_HDA436T_Serial::get_reading(Vector3f &reading_roll_deg, Vector3f &reading_pitch_deg, Vector3f &reading_yaw_deg, float &reading_slewing_deg, InstallLocation loc)
+bool AP_Inclination_HDA436T_Serial::get_reading(Vector3f &reading_roll_deg, Vector3f &reading_pitch_deg, Vector3f &reading_yaw_deg, InstallLocation loc)
 {
     if (uart == nullptr) {
         return false;

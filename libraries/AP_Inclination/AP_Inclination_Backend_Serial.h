@@ -36,7 +36,7 @@ protected:
     // it is essential that anyone relying on the base-class update to
     // implement this:
     //virtual bool get_reading(float &reading_roll_deg, float &reading_yaw_deg) = 0;
-    virtual bool get_reading(Vector3f &reading_roll_deg, Vector3f &reading_pitch_deg, Vector3f &reading_yaw_deg, float &reading_slewing_deg, InstallLocation loc) = 0;
+    virtual bool get_reading(Vector3f &reading_roll_deg, Vector3f &reading_pitch_deg, Vector3f &reading_yaw_deg, InstallLocation loc) = 0;
 
     // maximum time between readings before we change state to NoData:
     virtual uint16_t read_timeout_ms() const

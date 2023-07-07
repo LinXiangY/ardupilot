@@ -25,14 +25,12 @@
 extern const AP_HAL::HAL& hal;
 
 #define INCLI_FRAME_HEADER 0x03
-#define INCLI_FRAME_LENGTH 45
+#define INCLI_FRAME_LENGTH 41
 #define ROLL_YAW_OFFSET 180000
 #define PITCH_OFFSET 90000
 #define INCLINATION_ROLL_MAX_DEGREE 180
-#define INCLINATION_PITCH_MAX_DEGREE 180
+#define INCLINATION_PITCH_MAX_DEGREE 90
 #define INCLINATION_YAW_MAX_DEGREE 180
-#define ENCODER_DEG_MAX 360
-#define ENCODER_DEG_MIN 0
 
 // format of serial packets received from 3 inclination HDA436T sensors at 3 in 1 mode
 //
@@ -77,17 +75,17 @@ extern const AP_HAL::HAL& hal;
 // byte 36              Bucket_YAW1_H       yaw raw data 1 high 8 bits
 // byte 37              Bucket_YAW2_L       yaw raw data 1 low 8 bits
 // byte 38              Bucket_YAW2_H       yaw raw data 1 high 8 bits
-// byte 39              Encoder_spin_count_L    slewing spin count raw data low 8 bit
-// byte 40              Encoder_spin_count_H    slewing spin count raw data high 8 bit
-// byte 41              Encoder_deg_L       slewing raw data low 8 bit
-// byte 42              Encoder_deg_H       slewing raw data high 8 bit
+// byte 39              Encoder_spin_count_H    slewing spin count raw data high 8 bit
+// byte 40              Encoder_spin_count_L    slewing spin count raw data low 8 bit
+// byte 41              Encoder_deg_H       slewing raw data high 8 bit
+// byte 42              Encoder_deg_L       slewing raw data low 8 bit
 // byte 43              Checksum            low 8 bits of Checksum byte, sum of bytes 0 to bytes 16
 // byte 44              Checksum            high 8 bits of Checksum byte, sum of bytes 0 to bytes 16
 
 // read - return last value measured by sensor
 // reading_roll_deg.x is the boom roll angle, reading_roll_deg.y is the forearm roll angle, reading_roll_deg.z is the bucket roll angle.
 // reading_yaw_deg.x is the boom yaw angle, reading_yaw_deg.y is the forearm yaw angle, reading_yaw_deg.z is the bucket yaw angle,
-bool AP_Inclination_3HDA436Ts_Serial::get_reading(Vector3f &reading_roll_deg, Vector3f &reading_pitch_deg, Vector3f &reading_yaw_deg, float &reading_slewing_deg, InstallLocation location)
+bool AP_Inclination_3HDA436Ts_Serial::get_reading(Vector3f &reading_roll_deg, Vector3f &reading_pitch_deg, Vector3f &reading_yaw_deg, InstallLocation location)
 {
     if (uart == nullptr) {
         return false;
@@ -102,11 +100,9 @@ bool AP_Inclination_3HDA436Ts_Serial::get_reading(Vector3f &reading_roll_deg, Ve
     float bucket_sum_roll_deg = 0;
     float bucket_sum_pitch_deg = 0;
     float bucket_sum_yaw_deg = 0;
-    float slewing_sum_deg = 0; 
     uint16_t boom_count = 0;
     uint16_t forearm_count = 0;
     uint16_t bucket_count = 0;
-    uint16_t slewing_count = 0;
     uint16_t count_out_of_positive_range = 0;
     uint16_t count_out_of_negtive_range = 0;
 
@@ -146,7 +142,7 @@ bool AP_Inclination_3HDA436Ts_Serial::get_reading(Vector3f &reading_roll_deg, Ve
                     int32_t boom_pitch_raw = ((uint32_t)linebuf[10] << 24) | ((uint32_t)linebuf[9] << 16) | ((uint16_t)linebuf[8] << 8) | linebuf[7];
                     int32_t boom_yaw_raw = ((uint32_t)linebuf[14] << 24) | ((uint32_t)linebuf[13] << 16) | ((uint16_t)linebuf[12] << 8) | linebuf[11];
                     float boom_roll = (float)((boom_roll_raw - ROLL_YAW_OFFSET)*0.001);
-                    float boom_pitch = (float)((boom_pitch_raw - ROLL_YAW_OFFSET)*0.001);
+                    float boom_pitch = (float)((boom_pitch_raw - PITCH_OFFSET)*0.001);
                     float boom_yaw = (float)((boom_yaw_raw - ROLL_YAW_OFFSET)*0.001);
                     if (boom_roll > INCLINATION_ROLL_MAX_DEGREE || boom_pitch > INCLINATION_PITCH_MAX_DEGREE || boom_yaw > INCLINATION_YAW_MAX_DEGREE) {
                         // this reading is out of positive range
@@ -167,7 +163,7 @@ bool AP_Inclination_3HDA436Ts_Serial::get_reading(Vector3f &reading_roll_deg, Ve
                     int32_t forearm_pitch_raw = ((uint32_t)linebuf[22] << 24) | ((uint32_t)linebuf[21] << 16) | ((uint16_t)linebuf[20] << 8) | linebuf[19];
                     int32_t forearm_yaw_raw = ((uint32_t)linebuf[26] << 24) | ((uint32_t)linebuf[25] << 16) | ((uint16_t)linebuf[24] << 8) | linebuf[23];
                     float forearm_roll = (float)((forearm_roll_raw - ROLL_YAW_OFFSET)*0.001);
-                    float forearm_pitch = (float)((forearm_pitch_raw - ROLL_YAW_OFFSET)*0.001);
+                    float forearm_pitch = (float)((forearm_pitch_raw - PITCH_OFFSET)*0.001);
                     float forearm_yaw = (float)((forearm_yaw_raw - ROLL_YAW_OFFSET)*0.001);
                     if (forearm_roll > INCLINATION_ROLL_MAX_DEGREE || forearm_pitch > INCLINATION_PITCH_MAX_DEGREE || forearm_yaw > INCLINATION_YAW_MAX_DEGREE) {
                         // this reading is out of positive range
@@ -188,7 +184,7 @@ bool AP_Inclination_3HDA436Ts_Serial::get_reading(Vector3f &reading_roll_deg, Ve
                     int32_t bucket_pitch_raw = ((uint32_t)linebuf[34] << 24) | ((uint32_t)linebuf[33] << 16) | ((uint16_t)linebuf[32] << 8) | linebuf[31];
                     int32_t bucket_yaw_raw = ((uint32_t)linebuf[38] << 24) | ((uint32_t)linebuf[37] << 16) | ((uint16_t)linebuf[36] << 8) | linebuf[35];
                     float bucket_roll = (float)((bucket_roll_raw - ROLL_YAW_OFFSET)*0.001);
-                    float bucket_pitch = (float)((bucket_pitch_raw - ROLL_YAW_OFFSET)*0.001);
+                    float bucket_pitch = (float)((bucket_pitch_raw - PITCH_OFFSET)*0.001);
                     float bucket_yaw = (float)((bucket_yaw_raw - ROLL_YAW_OFFSET)*0.001);
                     if (bucket_roll > INCLINATION_ROLL_MAX_DEGREE || bucket_pitch > INCLINATION_PITCH_MAX_DEGREE || bucket_yaw > INCLINATION_YAW_MAX_DEGREE) {
                         // this reading is out of positive range
@@ -204,17 +200,6 @@ bool AP_Inclination_3HDA436Ts_Serial::get_reading(Vector3f &reading_roll_deg, Ve
                         bucket_count++;
                     }
 
-                    // calculate slewing deg
-                    int32_t slewing_deg_raw = (uint16_t)linebuf[42] << 8 | linebuf[41];
-                    float slewing_deg = float(slewing_deg_raw)*360/65535;
-                    if(slewing_deg > ENCODER_DEG_MAX){
-                        count_out_of_positive_range++;
-                    } else if (slewing_deg < ENCODER_DEG_MIN){
-                        count_out_of_negtive_range++;
-                    } else {
-                        slewing_sum_deg += slewing_deg;
-                        slewing_count++;
-                    }
                 }
 
                 // clear buffer
@@ -223,7 +208,7 @@ bool AP_Inclination_3HDA436Ts_Serial::get_reading(Vector3f &reading_roll_deg, Ve
         }
     }
 
-    if (boom_count > 0 && forearm_count > 0 && bucket_count > 0 && slewing_count >0) {
+    if (boom_count > 0 && forearm_count > 0 && bucket_count > 0) {
         // return average distance of readings
         reading_roll_deg.x = boom_sum_roll_deg / boom_count;
         reading_pitch_deg.x = boom_sum_pitch_deg / boom_count;
@@ -237,7 +222,6 @@ bool AP_Inclination_3HDA436Ts_Serial::get_reading(Vector3f &reading_roll_deg, Ve
         reading_pitch_deg.z = bucket_sum_pitch_deg / bucket_count;
         reading_yaw_deg.z = bucket_sum_yaw_deg / bucket_count;
 
-        reading_slewing_deg = slewing_sum_deg / slewing_count;
         //hal.console->printf("\r\nAP_Inclination_3HDA436Ts_Serial::get_reading: boom_roll = %f\t,forearm_roll = %f\t,bucket_roll = %f\r\n", reading_roll_deg.x, reading_roll_deg.y, reading_roll_deg.z);
 
         return true;
@@ -246,18 +230,16 @@ bool AP_Inclination_3HDA436Ts_Serial::get_reading(Vector3f &reading_roll_deg, Ve
     if (count_out_of_positive_range > 0) {
         // if out of range readings return maximum range for the positive angle
         reading_roll_deg.x = INCLINATION_ROLL_MAX_DEGREE;
-        reading_pitch_deg.x = INCLINATION_ROLL_MAX_DEGREE;
+        reading_pitch_deg.x = INCLINATION_PITCH_MAX_DEGREE;
         reading_yaw_deg.x = INCLINATION_YAW_MAX_DEGREE;
 
         reading_roll_deg.y = INCLINATION_ROLL_MAX_DEGREE;
-        reading_pitch_deg.y = INCLINATION_ROLL_MAX_DEGREE;
+        reading_pitch_deg.y = INCLINATION_PITCH_MAX_DEGREE;
         reading_yaw_deg.y = INCLINATION_YAW_MAX_DEGREE;
 
         reading_roll_deg.z = INCLINATION_ROLL_MAX_DEGREE;
-        reading_pitch_deg.z = INCLINATION_ROLL_MAX_DEGREE;
+        reading_pitch_deg.z = INCLINATION_PITCH_MAX_DEGREE;
         reading_yaw_deg.z = INCLINATION_YAW_MAX_DEGREE;
-
-        reading_slewing_deg = ENCODER_DEG_MAX;
 
         return true;
     }
@@ -265,18 +247,16 @@ bool AP_Inclination_3HDA436Ts_Serial::get_reading(Vector3f &reading_roll_deg, Ve
     if (count_out_of_negtive_range > 0) {
         // if out of range readings return maximum range for the negtive angle
         reading_roll_deg.x = -INCLINATION_ROLL_MAX_DEGREE;
-        reading_pitch_deg.x = -INCLINATION_ROLL_MAX_DEGREE;
+        reading_pitch_deg.x = -INCLINATION_PITCH_MAX_DEGREE;
         reading_yaw_deg.x = -INCLINATION_YAW_MAX_DEGREE;
 
         reading_roll_deg.y = -INCLINATION_ROLL_MAX_DEGREE;
-        reading_pitch_deg.y = -INCLINATION_ROLL_MAX_DEGREE;
+        reading_pitch_deg.y = -INCLINATION_PITCH_MAX_DEGREE;
         reading_yaw_deg.y = -INCLINATION_YAW_MAX_DEGREE;
 
         reading_roll_deg.z = -INCLINATION_ROLL_MAX_DEGREE;
-        reading_pitch_deg.z = -INCLINATION_ROLL_MAX_DEGREE;
+        reading_pitch_deg.z = -INCLINATION_PITCH_MAX_DEGREE;
         reading_yaw_deg.z = -INCLINATION_YAW_MAX_DEGREE;
-
-        reading_slewing_deg = ENCODER_DEG_MIN;
 
         return true;
     }

@@ -47,8 +47,8 @@ private:
     //     struct AE_RobotArmInfo::Cylinder_State status[EXCAVATOR_ARM_CYLINDER_NUM];
     // };
     bool calc_excavator_info(void);
-    bool calc_bucket_position(float boom,float forearm,float bucket,float slewing);
-    bool calc_oil_cylinder_length(float boom_to_slewing,float forearm_to_boom,float bucket_to_forearm);
+    void calc_bucket_position(float boom,float forearm,float bucket,float slewing);
+    void calc_oil_cylinder_length(float boom_to_slewing,float forearm_to_boom,float bucket_to_forearm);
     bool update_excavator_struct(void);
     bool check_if_info_valid(struct Excavator_Robot_Arm_State& ex_state);
     void adjust_to_body_origin(float euler_boom, float euler_forearm, float euler_bucket, float &boom_to_body,float &forearm_to_body,float &bucket_to_body); 
