@@ -387,6 +387,17 @@ struct PACKED log_WheelEncoder {
     uint8_t quality_1;
 };
 
+struct PACKED log_SlewingEncoder {
+    LOG_PACKET_HEADER;
+    uint64_t time_us;
+    float angle_diff_base2arm;
+    uint16_t single_turn_count;
+    uint16_t total_turns_count;
+    uint16_t amp_yaw;
+    uint32_t full_turns_counts;
+    float inclination_yaw;
+};
+
 struct PACKED log_ADSB {
     LOG_PACKET_HEADER;
     uint64_t time_us;
@@ -1303,6 +1314,22 @@ struct PACKED log_VER {
 // @Field: Stat: Sensor state
 // @Field: Orient: Sensor orientation
 
+// @LoggerMessage: RAWP
+// @Description: Robot Arm Way Point
+// @Field: TimeUS: Time since system startup
+// @Field: Tot: total number of robot arm waypoints onboard
+// @Field: Seq: this robot arm way point's sequence number
+// @Field: x: x position of robot arm way point in body frame
+// @Field: y: y position of robot arm way point in body frame
+// @Field: Alt: altitude of robot arm way point in body frame
+
+// @LoggerMessage: SLEN
+// @Description: SLewing ENcoder
+// @Field: TimeUS: Time since system startup
+// @Field: diffBaseArm: angle difference between base and arm
+// @Field: singleCount: single turn count of the slewing encoder
+// @Field: totalCounts: total turns count of the slewing encoder
+
 // messages for all boards
 #define LOG_COMMON_STRUCTURES \
     { LOG_FORMAT_MSG, sizeof(log_Format), \
@@ -1430,8 +1457,9 @@ LOG_STRUCTURE_FROM_AIS, \
     { LOG_ICLI_MSG, sizeof(log_ICLI_t), \
       "ICLI", "QBffBB",  "TimeUS,Instance,Roll,Temp,State,Location", "s#----", "F-----" , true }, \
     { LOG_RAWP_MSG, sizeof(log_Robot_Arm_WP), \
-      "RAWP", "QBBfff", "TimeUS,Tot,Seq,x,y,Alt", "s--mmm", "F-----" }
-
+      "RAWP", "QBBfff", "TimeUS,Tot,Seq,x,y,Alt", "s--mmm", "F-----" }, \
+    { LOG_SLEN_MSG, sizeof(log_SlewingEncoder), \
+      "SLEN", "QfHHHIf", "TimeUS,diffBaseArm,singleCount,totalCounts,ApmYaw,fullCount,incliYaw", "sd--h-d", "F---B--" }
 
 
 // message types 0 to 63 reserved for vehicle specific use
@@ -1517,6 +1545,7 @@ enum LogMessages : uint8_t {
     LOG_VER_MSG,
     LOG_ICLI_MSG,   //inclination sensors log
     LOG_RAWP_MSG,   //Robot Arm Way Point log
+    LOG_SLEN_MSG,   //SLewing ENcoder log
 
     _LOG_LAST_MSG_
 };

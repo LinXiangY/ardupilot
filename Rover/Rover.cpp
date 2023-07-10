@@ -135,7 +135,10 @@ const AP_Scheduler::Task Rover::scheduler_tasks[] = {
 #endif
     SCHED_TASK(read_inclinations,      50,    200,   138),
 #if AE_RobotArmInfo_ENABLED == ENABLED
-    SCHED_TASK_CLASS(AE_RobotArmInfo,   &rover.g2.rbt_arm_info,   update, 50,  200,  139),
+    SCHED_TASK_CLASS(AE_RobotArmInfo,   &rover.g2.rbt_arm_info,     update, 50,  200,  139),
+#endif
+#if AE_SLEWING_ENCODER_ENABLED == ENABLED
+    SCHED_TASK_CLASS(AE_SlewingEncoder, &rover.g2.slewing_encoder,  update, 50,  200,  140),
 #endif
 };
 

@@ -170,6 +170,7 @@ public:
         SerialProtocol_CoDevESC = 41,
         SerialProtocol_MSP_DisplayPort = 42,
         SerialProtocol_Inclination = 50,
+        SerialProtocol_SlewingEncoder = 51,
         SerialProtocol_NumProtocols                    // must be the last value
     };
 

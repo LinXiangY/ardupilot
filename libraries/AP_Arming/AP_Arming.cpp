@@ -32,6 +32,7 @@
 #include <AP_Baro/AP_Baro.h>
 #include <AP_RangeFinder/AP_RangeFinder.h>
 #include <AP_Inclination/AP_Inclination.h>
+#include <AE_SlewingEncoder/AE_SlewingEncoder.h>
 #include <AP_Generator/AP_Generator.h>
 #include <AP_Terrain/AP_Terrain.h>
 #include <AP_ADSB/AP_ADSB.h>
@@ -817,6 +818,24 @@ bool AP_Arming::inclination_checks(bool report)
     return true;
 }
 
+bool AP_Arming::slewing_encoder_checks(bool report)
+{
+    if ((checks_to_perform & ARMING_CHECK_ALL) || (checks_to_perform & ARMING_CHECK_SLEWENCODER)) {
+        AE_SlewingEncoder *slew_encoder = AE_SlewingEncoder::get_singleton();
+        if (slew_encoder == nullptr) {
+            return true;
+        }
+
+        char buffer[MAVLINK_MSG_STATUSTEXT_FIELD_TEXT_LEN+1];
+        if (!slew_encoder->prearm_healthy(buffer, ARRAY_SIZE(buffer))) {
+            check_failed(ARMING_CHECK_SLEWENCODER, report, "%s", buffer);
+            return false;
+        }
+    }
+
+    return true;
+}
+
 bool AP_Arming::servo_checks(bool report) const
 {
 #if NUM_SERVO_CHANNELS
@@ -1319,6 +1338,7 @@ bool AP_Arming::pre_arm_checks(bool report)
         &  mission_checks(report)
         &  rangefinder_checks(report)
         &  inclination_checks(report)
+        &  slewing_encoder_checks(report)
         &  servo_checks(report)
         &  board_voltage_checks(report)
         &  system_checks(report)

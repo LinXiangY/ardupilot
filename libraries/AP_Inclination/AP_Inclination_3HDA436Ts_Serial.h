@@ -18,9 +18,7 @@ public:
 private:
 
     // get a reading,Vector3f's first value is boom, second is forearm, third is bucket.
-    // bool get_reading(float &reading_roll_m, float &reading_yaw_m) override;
-    bool get_reading(Vector3f &reading_roll_deg, Vector3f &reading_pitch_deg, Vector3f &reading_yaw_deg, InstallLocation loc) override;
-
-    uint8_t  linebuf[50];
+    bool get_reading(Vector3f &reading_roll_deg, Vector3f &reading_pitch_deg, Vector3f &reading_yaw_deg, InstallLocation location) override;
+    uint8_t  linebuf[42];
     uint8_t  linebuf_len;
 };

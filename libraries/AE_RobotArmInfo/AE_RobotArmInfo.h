@@ -68,6 +68,7 @@ public:
         enum Ex_OC_Name cylinder_name;
     };
 
+    //TBM Cutting Header Cylinder State
     struct TBM_CH_Cylinder_State {
         float length_mm;                        // mm
         float velocity_mms;                     // mm/s
@@ -136,7 +137,7 @@ private:
     // Excavator param, refer to the website below to determine the specific meaning of the paramters
     // https://gitee.com/andychen183/roadheader_gcs/issues/I7BLTG
     struct EXCVT_PARAM{
-        AP_Float    _cylinder_max[3];     // The maximum stroke of the boom/forearm/bucket oil cylinder
+        AP_Float    _cylinder_max[3];       //The maximum stroke of the boom/forearm/bucket oil cylinder
         AP_Float    _mm_JC;
         AP_Float    _mm_CF;
         AP_Float    _mm_FQ;
@@ -168,17 +169,28 @@ private:
     // TBM param, refer to the website below to determine the specific meaning of the paramters
     // 
     struct TBM_PARAM{
+        //TBM slewing param(test by TBM)
         // AP_Float _mm_AB;
         // AP_Float _mm_OB;
         // AP_Float _deg_OBA;
-        AP_Float _ch_cylinder_max[2];
-        AP_Float _bsl_cylinder_max[2];
-        AP_Float _mm_CD;
-        AP_Float _mm_DF;
-        AP_Float _mm_GI;
-        AP_Float _mm_CI;
-        AP_Float _deg_CDH;
-        //TBM_PARAM
+        AP_Float   _ch_cylinder_max[2];
+        //TBM Back support leg param(test by TBM)
+        AP_Float   _bsl_cylinder_max[2];
+        // AP_Float _mm_CD;
+        // AP_Float _mm_DF;
+        // AP_Float _mm_GI;
+        // AP_Float _mm_CI;
+        // AP_Float _deg_CDH;
+
+        //TBM_cutting head PARAM (test by excavator) 
+        AP_Float    _mm_AC;
+        AP_Float    _mm_BC;
+        AP_Float    _mm_CF;
+        AP_Float    _mm_JL;
+        AP_Float    _mm_JC;
+        AP_Float    _deg_BFC;
+        AP_Float    _deg_BCF;
+        AP_Float    _deg_TCA;
     } tbm_param;
 
     static AE_RobotArmInfo *_singleton; //singleton

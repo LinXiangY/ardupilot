@@ -37,8 +37,8 @@ void AE_RobotArmInfo_SITL::update()
     // if(!calc_excavator_info()){
     //   // update health
     //   _state.flags.healthy = false;
-    // }    
-    
+    // }
+
     // //计算完成后把挖掘机类的私有变量赋给结构体供外界调用
     // if(check_if_info_valid(ex_info))
     // {
@@ -47,7 +47,7 @@ void AE_RobotArmInfo_SITL::update()
 
     return;
 }
- 
+
 //update the cutting header state at base's body frame
 // void AP_TBM_Info::update_TBM_cutting_header_state(const Vector3f &boom_atti_deg)
 // {
@@ -56,7 +56,7 @@ void AE_RobotArmInfo_SITL::update()
 // }
 
 
- 
+
 
 
 

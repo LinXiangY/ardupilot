@@ -21,7 +21,7 @@ public:
     // AP_TBM_Info::TBM_Cutting_Header_State get_TBM_cutting_header_state() const { return _cutting_header_state; }
 
     //update the cutting header state at base's body frame
-    // void  AP_TBM_Info::update_TBM_cutting_header_state(const Vector3f &boom_atti_deg);    
+    // void  AP_TBM_Info::update_TBM_cutting_header_state(const Vector3f &boom_atti_deg);
 
 private:
 

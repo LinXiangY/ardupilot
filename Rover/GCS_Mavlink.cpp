@@ -177,20 +177,30 @@ void GCS_MAVLINK_Rover::send_rangefinder() const
     //     chan,
     //     distance_cm * 0.01f,
     //     voltage);
+/////////////////////////////////////////////////////////////////
+    // Inclination *inclination = Inclination::get_singleton();
+    // if (inclination == nullptr) {
+    //     return;
+    // }
+    // AP_Inclination_Backend *incli_backend = inclination->find_instance(Boom);
+    // if (incli_backend == nullptr) {
+    //     return;
+    // }
 
-    Inclination *inclination = Inclination::get_singleton();
-    if (inclination == nullptr) {
-        return;
-    }
-    AP_Inclination_Backend *incli_backend = inclination->find_instance(Boom);
-    if (incli_backend == nullptr) {
+    // mavlink_msg_rangefinder_send(
+    //         chan,
+    //         incli_backend->get_roll_deg_from_location(Boom),
+    //         incli_backend->get_yaw_deg_from_location(Boom));
+/////////////////////////////////////////////////////////////////
+    AE_SlewingEncoder *slewingEncoder = AE_SlewingEncoder::get_singleton();
+    if (slewingEncoder == nullptr) {
         return;
     }
 
     mavlink_msg_rangefinder_send(
             chan,
-            incli_backend->get_roll_deg_from_location(Boom),
-            incli_backend->get_yaw_deg_from_location(Boom));
+            degrees(slewingEncoder->get_angle_deg_diff_base2arm_loc(AE_SlewingEncoder::Install_Location::INSTALL_SLEWING)),
+            slewingEncoder->get_full_turns_counts_loc(AE_SlewingEncoder::Install_Location::INSTALL_SLEWING));
 }
 
 /*

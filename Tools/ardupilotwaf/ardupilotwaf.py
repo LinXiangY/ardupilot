@@ -46,6 +46,7 @@ COMMON_VEHICLE_DEPENDENT_LIBRARIES = [
     'AP_Param',
     'AP_Rally',
     'AE_RobotArmWP',
+    'AE_SlewingEncoder',
     'AP_RangeFinder',
     'AP_Inclination',
     'AP_Scheduler',

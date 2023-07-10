@@ -1,33 +1,17 @@
-/*
-   This program is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 #include "AP_Inclination_HDA436T_Serial.h"
 #include <AP_HAL/AP_HAL.h>
 #include <AP_HAL/utility/sparse-endian.h>
 #include <ctype.h>
 
-#define HDA436T_HDR 0x03   // Header Byte from USD1_Serial
-#define HDA436T_DATA_LENGTH 0x0E // length of Data for Byte of HDA436T_Serial
-
 extern const AP_HAL::HAL& hal;
 
 #define HDA436T_FRAME_HEADER 0x03
 #define HDA436T_FRAME_LENGTH 19
+#define HDA436T_DATA_LENGTH 0x0E // length of Data for Byte of HDA436T_Serial
 #define ROLL_YAW_OFFSET 180000
 #define PITCH_OFFSET 90000
 #define INCLINATION_ROLL_MAX_DEGREE 180
+#define INCLINATION_PITCH_MAX_DEGREE 90
 #define INCLINATION_YAW_MAX_DEGREE 180
 
 // format of serial packets received from inclination sensor HDA436T
@@ -51,18 +35,19 @@ extern const AP_HAL::HAL& hal;
 // byte 14              YAW2_H          yaw raw data 1 high 8 bits
 // byte 15              TEMPERATURE1    high 4 bits is positive or negtive?  0:P   1:N ;  low 4 bits is tens bit of tempterature
 // byte 16              TEMPERATURE2    high 4 bits is ones bit of tempterature;   low 4 bits is decimal bit of tempterature
-// byte 17               Checksum       high 8 bits of Checksum byte, sum of bytes 0 to bytes 16
-// byte 18               Checksum       low  8 bits of Checksum byte, sum of bytes 0 to bytes 16
+// byte 17              Checksum        high 8 bits of Checksum byte, sum of bytes 0 to bytes 16
+// byte 18              Checksum        low  8 bits of Checksum byte, sum of bytes 0 to bytes 16
 
 
 // read - return last value measured by sensor
-bool AP_Inclination_HDA436T_Serial::get_reading(Vector3f &reading_roll_deg, Vector3f &reading_pitch_deg, Vector3f &reading_yaw_deg, InstallLocation loc)
+bool AP_Inclination_HDA436T_Serial::get_reading(Vector3f &reading_roll_deg, Vector3f &reading_pitch_deg, Vector3f &reading_yaw_deg, InstallLocation location)
 {
     if (uart == nullptr) {
         return false;
     }
 
     float sum_roll_deg = 0;
+    float sum_pitch_deg = 0;
     float sum_yaw_deg = 0;
     uint16_t count = 0;
     uint16_t count_out_of_positive_range = 0;
@@ -100,21 +85,22 @@ bool AP_Inclination_HDA436T_Serial::get_reading(Vector3f &reading_roll_deg, Vect
                 if (crc == calc_crc_modbus(linebuf, 17)) {
                     // calculate roll angle
                     int32_t roll_raw = ((uint32_t)linebuf[6] << 24) | ((uint32_t)linebuf[5] << 16) | ((uint16_t)linebuf[4] << 8) | linebuf[3];
-                    // int32_t pitch_raw = ((uint32_t)linebuf[10] << 24) | ((uint32_t)linebuf[9] << 16) | ((uint16_t)linebuf[8] << 8) | linebuf[7];
+                    int32_t pitch_raw = ((uint32_t)linebuf[10] << 24) | ((uint32_t)linebuf[9] << 16) | ((uint16_t)linebuf[8] << 8) | linebuf[7];
                     int32_t yaw_raw = ((uint32_t)linebuf[14] << 24) | ((uint32_t)linebuf[13] << 16) | ((uint16_t)linebuf[12] << 8) | linebuf[11];
                     float roll = (float)((roll_raw - ROLL_YAW_OFFSET)*0.001);
-                    // float pitch = (float)((pitch_raw - PITCH_OFFSET)*0.001);
+                    float pitch = (float)((pitch_raw - PITCH_OFFSET)*0.001);
                     float yaw = (float)((yaw_raw - ROLL_YAW_OFFSET)*0.001);
-                    if (roll > INCLINATION_ROLL_MAX_DEGREE || yaw > INCLINATION_YAW_MAX_DEGREE) {
+                    if (roll > INCLINATION_ROLL_MAX_DEGREE || pitch > INCLINATION_PITCH_MAX_DEGREE || yaw > INCLINATION_YAW_MAX_DEGREE) {
                         // this reading is out of positive range
                         count_out_of_positive_range++;
-                    } else if ((roll < - INCLINATION_ROLL_MAX_DEGREE) || (yaw < - INCLINATION_YAW_MAX_DEGREE)) {
+                    } else if ((roll < - INCLINATION_ROLL_MAX_DEGREE) || (pitch < - INCLINATION_PITCH_MAX_DEGREE) || (yaw < - INCLINATION_YAW_MAX_DEGREE)) {
                         // this reading is out of negtive range
                         count_out_of_negtive_range++;
                     } else {
                         // add degree to sum
                         //hal.console->printf("555inclination tilt sensor uart: %f\t, %lu\t,  %lu\r\n", roll, roll_raw, (roll_raw - ROLL_YAW_OFFSET));
                         sum_roll_deg += roll;
+                        sum_pitch_deg += pitch;
                         sum_yaw_deg += yaw;
                         count++;
                     }
@@ -128,23 +114,27 @@ bool AP_Inclination_HDA436T_Serial::get_reading(Vector3f &reading_roll_deg, Vect
 
     if (count > 0) {
         // return average distance of readings
-        switch (loc) {
-        case InstallLocation::Boom:     //reading_roll_deg.x denote boom angle
-            reading_roll_deg.x = sum_roll_deg / count;
-            reading_yaw_deg.x = sum_yaw_deg / count;
+        switch (location) {
+        case InstallLocation::Boom:     //reading_roll/pitch/yaw_deg.x denote boom angle
+            reading_roll_deg.x  = sum_roll_deg  / count;
+            reading_pitch_deg.x = sum_pitch_deg / count;
+            reading_yaw_deg.x   = sum_yaw_deg   / count;
             break;
-        case InstallLocation::Forearm:     //reading_roll_deg.y denote forearm angle
-            reading_roll_deg.y = sum_roll_deg / count;
-            reading_yaw_deg.y = sum_yaw_deg / count;
+        case InstallLocation::Forearm:     //reading_roll/pitch/yaw_deg.y denote forearm angle
+            reading_roll_deg.y  = sum_roll_deg  / count;
+            reading_pitch_deg.y = sum_pitch_deg / count;
+            reading_yaw_deg.y   = sum_yaw_deg   / count;
             break;
-        case InstallLocation::Bucket:     //reading_roll_deg.z denote bucket angle
-            reading_roll_deg.z = sum_roll_deg / count;
-            reading_yaw_deg.z = sum_yaw_deg / count;
+        case InstallLocation::Bucket:     //reading_roll/pitch/yaw_deg.z denote bucket angle
+            reading_roll_deg.z  = sum_roll_deg  / count;
+            reading_pitch_deg.z = sum_pitch_deg / count;
+            reading_yaw_deg.z   = sum_yaw_deg   / count;
             break;
 
         default:
-            reading_roll_deg.x = sum_roll_deg / count; // LOCATION_NONE we treat it as boom angle
-            reading_yaw_deg.x = sum_yaw_deg / count;
+            reading_roll_deg.x  = sum_roll_deg  / count; // LOCATION_NONE we treat it as boom angle
+            reading_pitch_deg.x = sum_pitch_deg / count;
+            reading_yaw_deg.x   = sum_yaw_deg   / count;
             break;
         }
 
@@ -153,23 +143,27 @@ bool AP_Inclination_HDA436T_Serial::get_reading(Vector3f &reading_roll_deg, Vect
 
     if (count_out_of_positive_range > 0) {
         // if out of range readings return maximum range for the positive angle
-        switch (loc) {
-        case InstallLocation::Boom:     //reading_roll_deg.x denote boom angle
-            reading_roll_deg.x = INCLINATION_ROLL_MAX_DEGREE;
-            reading_yaw_deg.x = INCLINATION_YAW_MAX_DEGREE;
+        switch (location) {
+        case InstallLocation::Boom:     //reading_roll/pitch/yaw_deg.x denote boom angle
+            reading_roll_deg.x  = INCLINATION_ROLL_MAX_DEGREE;
+            reading_pitch_deg.x = INCLINATION_PITCH_MAX_DEGREE;
+            reading_yaw_deg.x   = INCLINATION_YAW_MAX_DEGREE;
             break;
-        case InstallLocation::Forearm:     //reading_roll_deg.y denote forearm angle
-            reading_roll_deg.y = INCLINATION_ROLL_MAX_DEGREE;
-            reading_yaw_deg.y = INCLINATION_YAW_MAX_DEGREE;
+        case InstallLocation::Forearm:     //reading_roll/pitch/yaw_deg.y denote forearm angle
+            reading_roll_deg.y  = INCLINATION_ROLL_MAX_DEGREE;
+            reading_pitch_deg.y = INCLINATION_PITCH_MAX_DEGREE;
+            reading_yaw_deg.y   = INCLINATION_YAW_MAX_DEGREE;
             break;
-        case InstallLocation::Bucket:     //reading_roll_deg.z denote bucket angle
-            reading_roll_deg.z = INCLINATION_ROLL_MAX_DEGREE;
-            reading_yaw_deg.z = INCLINATION_YAW_MAX_DEGREE;
+        case InstallLocation::Bucket:     //reading_roll/pitch/yaw_deg.z denote bucket angle
+            reading_roll_deg.z  = INCLINATION_ROLL_MAX_DEGREE;
+            reading_pitch_deg.z = INCLINATION_PITCH_MAX_DEGREE;
+            reading_yaw_deg.z   = INCLINATION_YAW_MAX_DEGREE;
             break;
 
         default:
-            reading_roll_deg.x = INCLINATION_ROLL_MAX_DEGREE; // LOCATION_NONE we treat it as boom angle
-            reading_yaw_deg.x = INCLINATION_YAW_MAX_DEGREE;
+            reading_roll_deg.x  = INCLINATION_ROLL_MAX_DEGREE; // LOCATION_NONE we treat it as boom angle
+            reading_pitch_deg.x = INCLINATION_PITCH_MAX_DEGREE;
+            reading_yaw_deg.x   = INCLINATION_YAW_MAX_DEGREE;
             break;
         }
         return true;
@@ -177,23 +171,27 @@ bool AP_Inclination_HDA436T_Serial::get_reading(Vector3f &reading_roll_deg, Vect
 
     if (count_out_of_negtive_range > 0) {
         // if out of range readings return maximum range for the negtive angle
-        switch (loc) {
-        case InstallLocation::Boom:     //reading_roll_deg.x denote boom angle
-            reading_roll_deg.x = -INCLINATION_ROLL_MAX_DEGREE;
-            reading_yaw_deg.x = -INCLINATION_YAW_MAX_DEGREE;
+        switch (location) {
+        case InstallLocation::Boom:     //reading_roll/pitch/yaw_deg.x denote boom angle
+            reading_roll_deg.x  = -INCLINATION_ROLL_MAX_DEGREE;
+            reading_pitch_deg.x = -INCLINATION_PITCH_MAX_DEGREE;
+            reading_yaw_deg.x   = -INCLINATION_YAW_MAX_DEGREE;
             break;
-        case InstallLocation::Forearm:     //reading_roll_deg.y denote forearm angle
-            reading_roll_deg.y = -INCLINATION_ROLL_MAX_DEGREE;
-            reading_yaw_deg.y = -INCLINATION_YAW_MAX_DEGREE;
+        case InstallLocation::Forearm:     //reading_roll/pitch/yaw_deg.y denote forearm angle
+            reading_roll_deg.y  = -INCLINATION_ROLL_MAX_DEGREE;
+            reading_pitch_deg.y = -INCLINATION_PITCH_MAX_DEGREE;
+            reading_yaw_deg.y   = -INCLINATION_YAW_MAX_DEGREE;
             break;
-        case InstallLocation::Bucket:     //reading_roll_deg.z denote bucket angle
-            reading_roll_deg.z = -INCLINATION_ROLL_MAX_DEGREE;
-            reading_yaw_deg.z = -INCLINATION_YAW_MAX_DEGREE;
+        case InstallLocation::Bucket:     //reading_roll/pitch/yaw_deg.z denote bucket angle
+            reading_roll_deg.z  = -INCLINATION_ROLL_MAX_DEGREE;
+            reading_pitch_deg.z = -INCLINATION_PITCH_MAX_DEGREE;
+            reading_yaw_deg.z   = -INCLINATION_YAW_MAX_DEGREE;
             break;
 
         default:
-            reading_roll_deg.x = -INCLINATION_ROLL_MAX_DEGREE; // LOCATION_NONE we treat it as boom angle
-            reading_yaw_deg.x = -INCLINATION_YAW_MAX_DEGREE;
+            reading_roll_deg.x  = -INCLINATION_ROLL_MAX_DEGREE; // LOCATION_NONE we treat it as boom angle
+            reading_pitch_deg.x = -INCLINATION_PITCH_MAX_DEGREE;
+            reading_yaw_deg.x   = -INCLINATION_YAW_MAX_DEGREE;
             break;
         }
         return true;
@@ -208,10 +206,7 @@ bool AP_Inclination_HDA436T_Serial::get_reading(Vector3f &reading_roll_deg, Vect
 // if use we should make a private var _temp, and get the _temp at get_reading().
 bool AP_Inclination_HDA436T_Serial::get_temp_C_from_loc(enum InstallLocation location, float &temp) const
 {
-    // uint32_t now_ms = AP_HAL::millis();
-    // if ((_temp_readtime_ms == 0) || ((now_ms - _temp_readtime_ms) > read_timeout_ms())) {
-    //     return false;
-    // }
-    //temp = _temp;
+    // if use, need to do
+
     return true;
 }

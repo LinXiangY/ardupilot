@@ -2,7 +2,7 @@
 
 #include <AP_Common/AP_Common.h>
 #include <AE_RobotArmInfo/AE_RobotArmInfo.h>
-
+#include <AE_SlewingEncoder/AE_SlewingEncoder.h>
 #include "RC_Channel.h"
 #include "AC_Sprayer/AC_Sprayer.h"
 #include "AP_Gripper/AP_Gripper.h"
@@ -378,6 +378,9 @@ public:
 
     // Robot arm info library
     AE_RobotArmInfo rbt_arm_info;
+
+    // slewing encoder library
+    AE_SlewingEncoder slewing_encoder;
 
     // Simple mode types
     AP_Int8 simple_type;

@@ -676,6 +676,12 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     AP_SUBGROUPINFO(rbt_arm_info, "RBTAM_", 52, ParametersG2, AE_RobotArmInfo),
 #endif
 
+#if AE_SLEWING_ENCODER_ENABLED == ENABLED
+    // @Group: SLEWING_ENCODER_
+    // @Path: AE_SlewingEncoder.cpp,../libraries/AE_SlewingEncoder/AE_SlewingEncoder.cpp
+    AP_SUBGROUPINFO(slewing_encoder, "SE", 53, ParametersG2, AE_SlewingEncoder),
+#endif
+
     AP_GROUPEND
 };
 

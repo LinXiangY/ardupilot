@@ -38,6 +38,7 @@ public:
         ARMING_CHECK_VISION      = (1U << 18),
         ARMING_CHECK_FFT         = (1U << 19),
         ARMING_CHECK_INCLINATION = (1U << 20),
+        ARMING_CHECK_SLEWENCODER = (1U << 21),
     };
 
     enum class Method {
@@ -170,6 +171,8 @@ protected:
     bool rangefinder_checks(bool report);
 
     bool inclination_checks(bool report);
+
+    bool slewing_encoder_checks(bool report);
 
     bool fence_checks(bool report);
 

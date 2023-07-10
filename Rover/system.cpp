@@ -83,6 +83,11 @@ void Rover::init_ardupilot()
     g2.rbt_arm_info.init();
 #endif
 
+#if AE_SLEWING_ENCODER_ENABLED
+    // initialise slewing encoder library
+    g2.slewing_encoder.init();
+#endif
+
 #if HAL_PROXIMITY_ENABLED
     // init proximity sensor
     g2.proximity.init();
