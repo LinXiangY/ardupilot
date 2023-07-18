@@ -49,6 +49,14 @@ public:
         OC_EX_BUCKET =       2,
     };
 
+    // // TBM Oli Cylinder Name
+    // enum class TBM_OC_Name : uint8_t {
+    //     OC_TBM_CUTHEADER_VERTIC =   0,
+    //     OC_TBM_CUTHEADER_HORIZ  =   1,
+    //     OC_TBM_BACK_LEG_LEFT    =   2,
+    //     OC_TBM_BACK_LEG_RIGHT   =   3,
+    // };
+
     // TBM Cutting Header Oli Cylinder Name
     enum class TBM_CH_OC_Name : uint8_t {
         OC_TBM_CUTHEADER_VERTIC =         0,
@@ -67,6 +75,14 @@ public:
         float length_max_mm;                    // mm        
         enum Ex_OC_Name cylinder_name;
     };
+
+    // //TBM Cutting Header Cylinder State
+    // struct TBM_Cylinder_State {
+    //     float length_mm;                        // mm
+    //     float velocity_mms;                     // mm/s
+    //     float length_max_mm;                    // mm        
+    //     enum TBM_OC_Name cylinder_name;
+    // };
 
     //TBM Cutting Header Cylinder State
     struct TBM_CH_Cylinder_State {
@@ -169,20 +185,9 @@ private:
     // TBM param, refer to the website below to determine the specific meaning of the paramters
     // 
     struct TBM_PARAM{
-        //TBM slewing param(test by TBM)
-        // AP_Float _mm_AB;
-        // AP_Float _mm_OB;
-        // AP_Float _deg_OBA;
-        AP_Float   _ch_cylinder_max[2];
-        //TBM Back support leg param(test by TBM)
-        AP_Float   _bsl_cylinder_max[2];
-        // AP_Float _mm_CD;
-        // AP_Float _mm_DF;
-        // AP_Float _mm_GI;
-        // AP_Float _mm_CI;
-        // AP_Float _deg_CDH;
-
-        //TBM_cutting head PARAM (test by excavator) 
+        // AP_Float    _cylinder_max[4];   // The maximum stroke of the oil cylinder,0/1 are cutting_header height/vertical and 2/3 are back_support_leg left/right
+        //TBM cutting head param(test by excavator)         
+        AP_Float    _ch_cylinder_max[2];
         AP_Float    _mm_AC;
         AP_Float    _mm_BC;
         AP_Float    _mm_CF;
@@ -191,6 +196,19 @@ private:
         AP_Float    _deg_BFC;
         AP_Float    _deg_BCF;
         AP_Float    _deg_TCA;
+        
+        // TBM slewing param(test by TBM)
+        AP_Float _mm_AB;
+        AP_Float _mm_OB;
+        AP_Float _deg_OBA;
+
+        //TBM Back support leg param(test by TBM)
+        AP_Float    _bsl_cylinder_max[2]; 
+        AP_Float    _mm_CD;
+        AP_Float    _mm_DF;
+        AP_Float    _mm_GI;
+        AP_Float    _mm_CI;
+        AP_Float    _deg_CDH;
     } tbm_param;
 
     static AE_RobotArmInfo *_singleton; //singleton

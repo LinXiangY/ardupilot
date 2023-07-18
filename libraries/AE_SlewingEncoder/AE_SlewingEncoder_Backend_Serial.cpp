@@ -39,10 +39,8 @@ float AE_SlewingEncoder_Backend_Serial::calc_angle_diff_base2arm()
 {
     uint32_t middle_count = state.max_single_turn_count*state.max_total_turns_count/2;
     float diff_deg = (float)((state.full_turn_count - middle_count) * 360 / state.turns_count_per_slewing_revolution);
-    // return wrap_PI(radians(diff_deg));
-    // return wrap_360_cd(diff_deg);
+
     return wrap_PI(radians(diff_deg));
-    // return diff_deg;
 }
 
 /*
